@@ -49,8 +49,8 @@ class IPythonKernel(KernelBase):
     shell_class = Type(ZMQInteractiveShell)
 
     use_experimental_completions = Bool(True,
-        help="Set this flag to False to deactivate the use of experimental IPython completion APIs.",
-    ).tag(config=True)
+                                        help="Set this flag to False to deactivate the use of experimental IPython completion APIs.",
+                                        ).tag(config=True)
 
     debugpy_stream = Instance(ZMQStream, allow_none=True) if _is_debugpy_available else None
 
@@ -80,19 +80,19 @@ class IPythonKernel(KernelBase):
         # Initialize the Debugger
         if _is_debugpy_available:
             self.debugger = Debugger(self.log,
-                                    self.debugpy_stream,
-                                    self._publish_debug_event,
-                                    self.debug_shell_socket,
-                                    self.session)
+                                     self.debugpy_stream,
+                                     self._publish_debug_event,
+                                     self.debug_shell_socket,
+                                     self.session)
 
         # Initialize the InteractiveShell subclass
         self.shell = self.shell_class.instance(parent=self,
-            profile_dir = self.profile_dir,
-            user_module = self.user_module,
-            user_ns     = self.user_ns,
-            kernel      = self,
-            compiler_class = XCachingCompiler,
-        )
+                                               profile_dir = self.profile_dir,
+                                               user_module = self.user_module,
+                                               user_ns     = self.user_ns,
+                                               kernel      = self,
+                                               compiler_class = XCachingCompiler,
+                                               )
         self.shell.displayhook.session = self.session
         self.shell.displayhook.pub_socket = self.iopub_socket
         self.shell.displayhook.topic = self._topic('execute_result')
@@ -208,8 +208,8 @@ class IPythonKernel(KernelBase):
         # This is required by ipyparallel < 5.0
         metadata["status"] = reply_content["status"]
         if (
-            reply_content["status"] == "error"
-            and reply_content["ename"] == "UnmetDependency"
+                reply_content["status"] == "error"
+                and reply_content["ename"] == "UnmetDependency"
         ):
             metadata["dependencies_met"] = False
 
@@ -293,8 +293,9 @@ class IPythonKernel(KernelBase):
 
     async def do_execute(self, code, silent, store_history=True,
                          user_expressions=None, allow_stdin=False):
-        shell = self.shell # we'll need this a lot here
 
+        self.log.error("Hey Dimuthu: Running a cell mate")
+        shell = self.shell # we'll need this a lot here
         self._forward_input(allow_stdin)
 
         reply_content = {}
@@ -305,6 +306,7 @@ class IPythonKernel(KernelBase):
             should_run_async = lambda cell: False
             # older IPython,
             # use blocking run_cell and wrap it in coroutine
+            open("/dev/null")
             async def run_cell(*args, **kwargs):
                 return shell.run_cell(*args, **kwargs)
         try:
@@ -320,14 +322,14 @@ class IPythonKernel(KernelBase):
                 preprocessing_exc_tuple = sys.exc_info()
 
             if (
-                _asyncio_runner
-                and shell.loop_runner is _asyncio_runner
-                and asyncio.get_event_loop().is_running()
-                and should_run_async(
-                    code,
-                    transformed_cell=transformed_cell,
-                    preprocessing_exc_tuple=preprocessing_exc_tuple,
-                )
+                    _asyncio_runner
+                    and shell.loop_runner is _asyncio_runner
+                    and asyncio.get_event_loop().is_running()
+                    and should_run_async(
+                code,
+                transformed_cell=transformed_cell,
+                preprocessing_exc_tuple=preprocessing_exc_tuple,
+            )
             ):
                 coro = run_cell(
                     code,
@@ -387,7 +389,7 @@ class IPythonKernel(KernelBase):
         # or not.  If it did, we proceed to evaluate user_expressions
         if reply_content['status'] == 'ok':
             reply_content['user_expressions'] = \
-                         shell.user_expressions(user_expressions or {})
+                shell.user_expressions(user_expressions or {})
         else:
             # If there was an error, don't even try to compute expressions
             reply_content['user_expressions'] = {}
@@ -396,10 +398,12 @@ class IPythonKernel(KernelBase):
         # recover partial output (that could have been generated early in a
         # block, before an error) and always clear the payload system.
         reply_content['payload'] = shell.payload_manager.read_payload()
+
         # Be aggressive about clearing the payload because we don't want
         # it to sit in memory until the next execute_request comes in.
         shell.payload_manager.clear_payload()
 
+        open("/dev/null")
         return reply_content
 
     def do_complete(self, code, cursor_pos):
@@ -438,10 +442,10 @@ class IPythonKernel(KernelBase):
             comps = []
             for comp in completions:
                 comps.append(dict(
-                            start=comp.start,
-                            end=comp.end,
-                            text=comp.text,
-                            type=comp.type,
+                    start=comp.start,
+                    end=comp.end,
+                    text=comp.text,
+                    type=comp.type,
                 ))
 
         if completions:
@@ -492,7 +496,7 @@ class IPythonKernel(KernelBase):
                    stop=None, n=None, pattern=None, unique=False):
         if hist_access_type == 'tail':
             hist = self.shell.history_manager.get_tail(n, raw=raw, output=output,
-                                                            include_latest=True)
+                                                       include_latest=True)
 
         elif hist_access_type == 'range':
             hist = self.shell.history_manager.get_range(session, start, stop,
@@ -553,9 +557,9 @@ class IPythonKernel(KernelBase):
                     working.pop(key)
 
             result_buf = serialize_object(result,
-                buffer_threshold=self.session.buffer_threshold,
-                item_threshold=self.session.item_threshold,
-            )
+                                          buffer_threshold=self.session.buffer_threshold,
+                                          item_threshold=self.session.item_threshold,
+                                          )
 
         except BaseException as e:
             # invoke IPython traceback formatting

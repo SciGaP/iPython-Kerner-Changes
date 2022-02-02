@@ -44,7 +44,9 @@ from traitlets import (
 from jupyter_client.session import Session
 
 from ._version import kernel_protocol_version
-
+import socket
+import sys
+import os
 
 class Kernel(SingletonConfigurable):
 
@@ -130,11 +132,11 @@ class Kernel(SingletonConfigurable):
     # Private interface
 
     _darwin_app_nap = Bool(True,
-        help="""Whether to use appnope for compatibility with OS X App Nap.
+                           help="""Whether to use appnope for compatibility with OS X App Nap.
 
         Only affects OS X >= 10.9.
         """
-    ).tag(config=True)
+                           ).tag(config=True)
 
     # track associations with current request
     _allow_stdin = Bool(False)
@@ -486,6 +488,34 @@ class Kernel(SingletonConfigurable):
 
     def start(self):
         """register dispatchers for streams"""
+        pid = os.getpid()
+        self.log.error("Hey Dimuthu: starting the kernel on process " + str(pid))
+
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+        server_address = '/home/dimuthu/jupyter-trace/uds_socket'
+        self.log.error('connecting to ' + server_address)
+        try:
+            sock.connect(server_address)
+        except socket.error as msg:
+            self.log.error(msg)
+            sys.exit(1)
+
+        try:
+            self.log.error("Sending message to strace server")
+            message = str(pid)
+            sock.sendall(str.encode(message))
+
+            #amount_received = 0
+            #amount_expected = len(message)
+
+            #while amount_received < amount_expected:
+            #    data = sock.recv(16)
+            #    amount_received += len(data)
+
+        finally:
+            sock.close()
+
         self.io_loop = ioloop.IOLoop.current()
         self.msg_queue = Queue()
         self.io_loop.add_callback(self.dispatch_queue)
@@ -529,7 +559,7 @@ class Kernel(SingletonConfigurable):
         self.session.send(self.iopub_socket, 'execute_input',
                           {'code':code, 'execution_count': execution_count},
                           parent=parent, ident=self._topic('execute_input')
-        )
+                          )
 
     def _publish_status(self, status, channel, parent=None):
         """send status (busy/idle) on IOPub"""
@@ -580,7 +610,7 @@ class Kernel(SingletonConfigurable):
         return self._parents.get(channel, {})
 
     def send_response(self, stream, msg_or_type, content=None, ident=None,
-             buffers=None, track=False, header=None, metadata=None, channel='shell'):
+                      buffers=None, track=False, header=None, metadata=None, channel='shell'):
         """Send a response to the message we're currently processing.
 
         This accepts all the parameters of :meth:`jupyter_client.session.Session.send`
@@ -818,7 +848,7 @@ class Kernel(SingletonConfigurable):
         # same content, but different msg_id for broadcasting on IOPub
         self._shutdown_message = self.session.msg('shutdown_reply',
                                                   content, parent
-        )
+                                                  )
 
         self._at_shutdown()
 
@@ -834,6 +864,7 @@ class Kernel(SingletonConfigurable):
         """Override in subclasses to do things when the frontend shuts down the
         kernel.
         """
+
         return {'status': 'ok', 'restart': restart}
 
     async def is_complete_request(self, stream, ident, parent):
@@ -925,7 +956,7 @@ class Kernel(SingletonConfigurable):
         md = self.finish_metadata(parent, md, reply_content)
 
         self.session.send(stream, 'apply_reply', reply_content,
-                    parent=parent, ident=ident,buffers=result_buf, metadata=md)
+                          parent=parent, ident=ident,buffers=result_buf, metadata=md)
 
     def do_apply(self, content, bufs, msg_id, reply_metadata):
         """DEPRECATED"""
@@ -948,7 +979,7 @@ class Kernel(SingletonConfigurable):
 
         content = dict(status='ok')
         reply_msg = self.session.send(stream, 'abort_reply', content=content,
-                parent=parent, ident=ident)
+                                      parent=parent, ident=ident)
         self.log.debug("%s", reply_msg)
 
     async def clear_request(self, stream, idents, parent):
@@ -956,7 +987,7 @@ class Kernel(SingletonConfigurable):
         self.log.warning("clear_request is deprecated in kernel_base. It is only part of IPython parallel")
         content = self.do_clear()
         self.session.send(stream, 'clear_reply', ident=idents, parent=parent,
-                content = content)
+                          content = content)
 
     def do_clear(self):
         """DEPRECATED since 4.0.3"""

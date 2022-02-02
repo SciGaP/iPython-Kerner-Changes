@@ -7,6 +7,9 @@ This package provides the IPython kernel for Jupyter.
 1. `git clone`
 2. `cd ipykernel`
 3. `pip install -e ".[test]"`
+4. `jupyter kernelspec install  --user /home/dimuthu/code/ipykernel/`
+5. `jupyter notebook --ip 0.0.0.0 `
+6. `sudo python3 tools/strace_server.py`
 
 After that, all normal `ipython` commands will use this newly-installed version of the kernel.
 
