@@ -8,7 +8,11 @@ RUN apt install -y python3
 RUN apt install -y python3-pip
 
 RUN mkdir -p /opt
-COPY . /opt
+COPY ipykernel /opt/ipykernel
+COPY tools /opt/tools
+COPY ExampleNotebooks /opt/ExampleNotebooks
+COPY scripts /opt/scripts
+
 RUN pip install wheel
 RUN cd /opt/ipykernel; pip install .
 RUN cd /opt/tools/state_capture_magic; pip install .
