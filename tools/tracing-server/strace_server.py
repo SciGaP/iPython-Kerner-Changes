@@ -53,7 +53,7 @@ while True:
                 straceProcess = None
                 for elem in arr:
                     if "strace -p " + processId in elem:
-                        straceProcess = elem.split(" ")[8]
+                        straceProcess = " ".join(elem.split()).split(" ")[1]
 
                 if (straceProcess):
                     subprocess.run(["kill", straceProcess], capture_output=True)
