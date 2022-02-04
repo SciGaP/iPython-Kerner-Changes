@@ -3,7 +3,7 @@ import sys
 import os
 import subprocess
 
-trace_directory = "/home/dimuthu/jupyter-trace"
+trace_directory = "/tmp"
 server_address = trace_directory + '/uds_socket'
 
 # Make sure the socket does not already exist
@@ -34,7 +34,7 @@ while True:
         if data:
             processId = data.decode("utf-8")
             print("Running sub process to strace")
-            subprocess.call("sudo strace -p " + processId + " -Tfe trace=openat -o " + trace_directory + "/p" + processId + " &", shell = True)
+            subprocess.call("strace -p " + processId + " -Tfe trace=openat -o " + trace_directory + "/p" + processId + " &", shell = True)
             #print('sending data back to the client')
             #connection.sendall(data)
         else:

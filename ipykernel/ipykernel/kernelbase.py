@@ -489,12 +489,12 @@ class Kernel(SingletonConfigurable):
     def start(self):
         """register dispatchers for streams"""
         pid = os.getpid()
-        self.log.error("Hey Dimuthu: starting the kernel on process " + str(pid))
+        self.log.error("CyberShuttle: Starting the kernel on process " + str(pid))
 
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
-        server_address = '/home/dimuthu/jupyter-trace/uds_socket'
-        self.log.error('connecting to ' + server_address)
+        server_address = '/tmp/uds_socket'
+        self.log.error('CyberShuttle: connecting to ' + server_address + " for tracing the process " + str(pid))
         try:
             sock.connect(server_address)
         except socket.error as msg:

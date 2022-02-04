@@ -294,7 +294,6 @@ class IPythonKernel(KernelBase):
     async def do_execute(self, code, silent, store_history=True,
                          user_expressions=None, allow_stdin=False):
 
-        self.log.error("Hey Dimuthu: Running a cell mate")
         shell = self.shell # we'll need this a lot here
         self._forward_input(allow_stdin)
 

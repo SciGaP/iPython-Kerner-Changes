@@ -18,13 +18,13 @@ class StateCaptureMagic(Magics):
     @needs_local_scope
     def export_states(self, line, cell="", local_ns=None):
         pid = os.getpid()
-        log_file = "/home/dimuthu/jupyter-trace/p" + str(pid)
+        log_file = "/tmp/p" + str(pid)
         f = open(log_file)
         raw = f.read()
         lines = raw.splitlines()
 
         ignore_list = ['/usr', '/lib','/home/dimuthu/.ipython/', "/dev", ".so", "/proc",
-                       "/etc", "/tmp/pip-", "/home/dimuthu/.cache"]
+                       "/etc", "/tmp/pip-", "/home/dimuthu/.cache", "/root/.cache"]
 
         for path in sys.path[1:]:
             if path:
