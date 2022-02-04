@@ -503,16 +503,8 @@ class Kernel(SingletonConfigurable):
 
         try:
             self.log.error("Sending message to strace server")
-            message = str(pid)
+            message = "START:" + str(pid)
             sock.sendall(str.encode(message))
-
-            #amount_received = 0
-            #amount_expected = len(message)
-
-            #while amount_received < amount_expected:
-            #    data = sock.recv(16)
-            #    amount_received += len(data)
-
         finally:
             sock.close()
 

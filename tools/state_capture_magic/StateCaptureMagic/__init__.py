@@ -17,6 +17,23 @@ class StateCaptureMagic(Magics):
     @line_magic
     @needs_local_scope
     def export_states(self, line, cell="", local_ns=None):
+        parameters = line.split(" ")
+
+        createArchive = False
+        uploadServer = None
+
+        for param in parameters:
+            if param.startswith("createArchive"):
+                flag = param.split("=")[1]
+                if (flag == "True"):
+                    createArchive = True
+
+            if param.startswith("uploadServer"):
+                uploadServer = param.split("=")[1]
+
+        #print(createArchive)
+        #print(uploadServer)
+
         pid = os.getpid()
         log_file = "/tmp/p" + str(pid)
         f = open(log_file)

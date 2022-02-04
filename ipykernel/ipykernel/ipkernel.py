@@ -18,6 +18,9 @@ from .kernelbase import Kernel as KernelBase
 from .zmqshell import ZMQInteractiveShell
 from .eventloops import _use_appnope
 from .compiler import XCachingCompiler
+import socket
+import sys
+import os
 
 try:
     from IPython.core.interactiveshell import _asyncio_runner
@@ -291,11 +294,36 @@ class IPythonKernel(KernelBase):
             # restore the previous sigint handler
             signal.signal(signal.SIGINT, save_sigint)
 
+    def handle_tracing(self, command):
+        pid = os.getpid()
+        self.log.error("CyberShuttle: Starting the kernel on process " + str(pid))
+
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+        server_address = '/tmp/uds_socket'
+        self.log.error('CyberShuttle: connecting to ' + server_address + " for tracing the process " + str(pid))
+        try:
+            sock.connect(server_address)
+        except socket.error as msg:
+            self.log.error(msg)
+            sys.exit(1)
+
+        try:
+            self.log.error("Sending message to strace server")
+            message = command + ":" + str(pid)
+            sock.sendall(str.encode(message))
+        finally:
+            sock.close()
+
     async def do_execute(self, code, silent, store_history=True,
                          user_expressions=None, allow_stdin=False):
 
         shell = self.shell # we'll need this a lot here
         self._forward_input(allow_stdin)
+        bash_magic = False
+        if (code.startswith("!")):
+            bash_magic = True
+            self.handle_tracing("STOP")
 
         reply_content = {}
         if hasattr(shell, 'run_cell_async') and hasattr(shell, 'should_run_async'):
@@ -306,6 +334,8 @@ class IPythonKernel(KernelBase):
             # older IPython,
             # use blocking run_cell and wrap it in coroutine
             open("/dev/null")
+            if bash_magic:
+                self.handle_tracing("START")
             async def run_cell(*args, **kwargs):
                 return shell.run_cell(*args, **kwargs)
         try:
@@ -403,6 +433,8 @@ class IPythonKernel(KernelBase):
         shell.payload_manager.clear_payload()
 
         open("/dev/null")
+        if bash_magic:
+            self.handle_tracing("START")
         return reply_content
 
     def do_complete(self, code, cursor_pos):

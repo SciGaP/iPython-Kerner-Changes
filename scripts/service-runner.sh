@@ -3,7 +3,7 @@
 LOG_FILE="service.log"
 TRACE_PID_FILE="TRACE_PID"
 
-python3 tools/tracing-server/strace_server.py $* > $LOG_FILE 2>&1 &
+python3 tools/tracing-server/strace_server.py &> $LOG_FILE &
 echo $! > $TRACE_PID_FILE
 jupyter notebook --ip 0.0.0.0 --allow-root
 
