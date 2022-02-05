@@ -488,25 +488,35 @@ class Kernel(SingletonConfigurable):
 
     def start(self):
         """register dispatchers for streams"""
-        pid = os.getpid()
-        self.log.error("CyberShuttle: Starting the kernel on process " + str(pid))
 
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        enable_trace = True
+        enable_str = os.getenv("ENABLE_TRACE")
+        if enable_str:
+            if "False" == enable_str:
+                enable_trace = False
 
-        server_address = '/tmp/uds_socket'
-        self.log.error('CyberShuttle: connecting to ' + server_address + " for tracing the process " + str(pid))
-        try:
-            sock.connect(server_address)
-        except socket.error as msg:
-            self.log.error(msg)
-            sys.exit(1)
+        if enable_trace:
+            pid = os.getpid()
+            self.log.error("CyberShuttle: Starting the kernel on process " + str(pid))
 
-        try:
-            self.log.error("Sending message to strace server")
-            message = "START:" + str(pid)
-            sock.sendall(str.encode(message))
-        finally:
-            sock.close()
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+            server_address = '/tmp/uds_socket'
+            self.log.error('CyberShuttle: connecting to ' + server_address + " for tracing the process " + str(pid))
+            try:
+                sock.connect(server_address)
+            except socket.error as msg:
+                self.log.error(msg)
+                sys.exit(1)
+
+            try:
+                self.log.error("Sending message to strace server")
+                message = "START:" + str(pid)
+                sock.sendall(str.encode(message))
+            finally:
+                sock.close()
+        else:
+            self.log.error("Tracing is disabled")
 
         self.io_loop = ioloop.IOLoop.current()
         self.msg_queue = Queue()
