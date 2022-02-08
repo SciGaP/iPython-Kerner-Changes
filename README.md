@@ -3,7 +3,14 @@
 ### Docker Instructions (Recommended)
 
 1. `docker build -t dimuthuupe/ipykernel:1.0 .`
-2. `docker run --cap-add=SYS_PTRACE -it -p 8888:8888  dimuthuupe/ipykernel:1.0`
+2. Start a fresh session :`docker run --cap-add=SYS_PTRACE -it -p 8888:8888  dimuthuupe/ipykernel:1.0`
+2. Load from an exported session :`docker run --cap-add=SYS_PTRACE -it -p 8888:8888 -v <ARCHIVE_FILE>:/opt/ARCHIVE.zip  dimuthuupe/ipykernel:1.0`
+
+### Magic Line Commonads to run in the Notebook
+
+1. `%load_ext StateCaptureMagic` : Loads the magic extension
+2. `%load_local_context`: Loads python runtime if an exported session archive is mounted
+3. `%export_states createArchive=True` Exports the current session and provides a link to download it
 
 ### Local Installation Instructions
 ##### Create the virtual environment
