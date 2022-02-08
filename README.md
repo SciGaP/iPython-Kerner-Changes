@@ -12,7 +12,7 @@
 2. `%load_local_context`: Loads python runtime if an exported session archive is mounted
 3. `%export_states createArchive=True` Exports the current session and provides a link to download it
 
-### Local Installation Instructions
+### Local Installation Instructions (For Developers)
 ##### Create the virtual environment
 
 1. `python3 -m venv ENV`
