@@ -15,10 +15,11 @@ RUN pip install dill
 RUN pip install notebook
 RUN pip install requests
 
+RUN apt install -y unzip
 RUN cd /opt/ipykernel; pip install .
 
 COPY tools /opt/tools
-COPY ExampleNotebooks /opt/ExampleNotebooks
+COPY ExampleNotebooks /opt/Notebooks
 RUN cd /opt/tools/state_capture_magic; pip install .
 RUN jupyter kernelspec install  --user /opt/ipykernel/
 

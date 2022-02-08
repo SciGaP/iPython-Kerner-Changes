@@ -25,6 +25,7 @@ import requests
 from requests.compat import urljoin
 import json
 import os.path
+from os.path import exists
 
 def load_ipython_extension(ipython):
     ipython.register_magics(StateCaptureMagic)
@@ -35,12 +36,19 @@ class StateCaptureMagic(Magics):
     @line_magic
     @needs_local_scope
     def load_local_context(self, line, cell="", local_ns=None):
-        with open("ARCHIVE/context.p", "rb") as input_file:
-            final_scope  = pickle.load(input_file)
 
-        for var in final_scope:
-            local_ns[var] = final_scope[var]
+        context_file = "/opt/ARCHIVE/context.p"
+        if exists(context_file):
 
+            with open(context_file, "rb") as input_file:
+                final_scope  = pickle.load(input_file)
+
+            for var in final_scope:
+                local_ns[var] = final_scope[var]
+
+            print("Successfully loaded run time context from " + context_file)
+        else:
+            print("No archive is loaded or context is not exported to the archive")
 
     @line_magic
     @needs_local_scope
@@ -145,6 +153,12 @@ class StateCaptureMagic(Magics):
 
             f = open(archive_dir + "/dependencies.json", "w")
             json.dump(dependencies, f)
+            f.close()
+
+            metadata = {}
+            metadata["workingDir"] = os.getcwd()
+            f = open(archive_dir + "/metadata.json", "w")
+            json.dump(metadata, f)
             f.close()
 
             if captureLocalContext:
