@@ -18,6 +18,14 @@ from IPython.display import FileLink
 from pathlib import Path
 import shutil
 
+import re
+import ipykernel
+from notebook.notebookapp import list_running_servers
+import requests
+from requests.compat import urljoin
+import json
+import os.path
+
 def load_ipython_extension(ipython):
     ipython.register_magics(StateCaptureMagic)
 
@@ -67,7 +75,9 @@ class StateCaptureMagic(Magics):
         lines = raw.splitlines()
 
         ignore_list = ['/usr', '/lib','/home/dimuthu/.ipython/', "/dev", ".so", "/proc",
-                       "/etc", "/tmp/pip-", "/home/dimuthu/.cache", "/root/.cache", "ARCHIVE"]
+                       "/etc", "/tmp/pip-", "/home/dimuthu/.cache", "/root/.cache", "ARCHIVE", "/root/.local"]
+
+        notebook_name = self.get_notebook_name()
 
         for path in sys.path[1:]:
             if path:
@@ -95,6 +105,7 @@ class StateCaptureMagic(Magics):
                     accessed_files.add(path)
 
         accessed_files.remove(log_file)
+        accessed_files.add(notebook_name)
 
         def imports():
             for name, val in local_ns.items():
@@ -141,6 +152,11 @@ class StateCaptureMagic(Magics):
                 var_context = {}
                 for var_name in local_variables:
                     var_context[var_name] = local_ns[var_name]
+                    try:
+                        pickle.dumps(var_context)
+                    except:
+                        print("Warning: Variable " + var_name + " can not be exported")
+                        var_context.pop(var_name)
                 pickle.dump( var_context, open( archive_dir + "/context.p", "wb" ))
 
             shutil.make_archive("ARCHIVE", 'zip', archive_dir)
@@ -158,3 +174,17 @@ class StateCaptureMagic(Magics):
             ipy.magic(command)
 
         return out.getvalue().replace('\n', '').split('\t ')
+
+
+    def get_notebook_name(self):
+
+        kernel_id = re.search('kernel-(.*).json',
+                              ipykernel.connect.get_connection_file()).group(1)
+        servers = list_running_servers()
+        for ss in servers:
+            response = requests.get(urljoin(ss['url'], 'api/sessions'),
+                                    params={'token': ss.get('token', '')})
+            for nn in json.loads(response.text):
+                if nn['kernel']['id'] == kernel_id:
+                    relative_path = nn['notebook']['path']
+                    return os.path.join(ss['notebook_dir'], relative_path)

@@ -13,6 +13,7 @@ COPY ipykernel /opt/ipykernel
 RUN pip install wheel
 RUN pip install dill
 RUN pip install notebook
+RUN pip install requests
 
 RUN cd /opt/ipykernel; pip install .
 
