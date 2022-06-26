@@ -26,6 +26,7 @@ from requests.compat import urljoin
 import json
 import os.path
 from os.path import exists
+import socket
 
 def load_ipython_extension(ipython):
     ipython.register_magics(StateCaptureMagic)
@@ -50,9 +51,37 @@ class StateCaptureMagic(Magics):
         else:
             print("No archive is loaded or context is not exported to the archive")
 
+    def control_tracing(self, turn_on):
+        pid = os.getpid()
+
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        server_address = '/tmp/uds_socket'
+
+        try:
+            sock.connect(server_address)
+        except socket.error as msg:
+            sys.exit(1)
+
+        try:
+            if turn_on:
+                print("Turning on tracing")
+                message = "START:" + str(pid)
+                sock.sendall(str.encode(message))
+            else:
+                print("Turning off tracing")
+                message = "STOP:" + str(pid)
+                sock.sendall(str.encode(message))
+        finally:
+            sock.close()
+
     @line_magic
     @needs_local_scope
     def export_states(self, line, cell="", local_ns=None):
+
+        pid = os.getpid()
+
+        self.control_tracing(False)
+
         parameters = line.split(" ")
 
         createArchive = False
@@ -76,14 +105,16 @@ class StateCaptureMagic(Magics):
         #print(createArchive)
         #print(uploadServer)
 
-        pid = os.getpid()
+
         log_file = "/tmp/p" + str(pid)
         f = open(log_file)
         raw = f.read()
         lines = raw.splitlines()
 
         ignore_list = ['/usr', '/lib','/home/dimuthu/.ipython/', "/dev", ".so", "/proc",
-                       "/etc", "/tmp/pip-", "/home/dimuthu/.cache", "/root/.cache", "ARCHIVE", "/root/.local"]
+                       "/etc", "/tmp/pip-", "/home/dimuthu/.cache", "/root/.cache",
+                       "ARCHIVE", "/root/.local", "dependencies.json", "context.p",
+                       "files.json", "metadata.json"]
 
         notebook_name = self.get_notebook_name()
 
@@ -112,7 +143,8 @@ class StateCaptureMagic(Magics):
                 if not should_ignore:
                     accessed_files.add(path)
 
-        accessed_files.remove(log_file)
+        if log_file in accessed_files:
+            accessed_files.remove(log_file)
         accessed_files.add(notebook_name)
 
         def imports():
@@ -176,6 +208,8 @@ class StateCaptureMagic(Magics):
             shutil.make_archive("ARCHIVE", 'zip', archive_dir)
             print("Download the state export ")
             display(FileLink("ARCHIVE.zip"))
+
+        self.control_tracing(True)
 
         return {"accessed_files": list(accessed_files), "dependencies": dependencies}
 
