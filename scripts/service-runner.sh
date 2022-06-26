@@ -14,7 +14,7 @@ fi
 python3 tools/tracing-server/strace_server.py &> $LOG_FILE &
 echo $! > $TRACE_PID_FILE
 cd Notebooks
-jupyter notebook --ip 0.0.0.0 --allow-root
+jupyter notebook --ip 0.0.0.0 --allow-root --NotebookApp.token=$NOTEBOOK_TOKEN
 
 if [ -f $TRACE_PID_FILE ]; then
   PID=$(cat $TRACE_PID_FILE)
