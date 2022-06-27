@@ -1,2 +1,6 @@
 platform-api/target/
 logs/
+platform-ui/node_modules
+platform-ui/package-lock.json
+jupyter-platform.iml
+.idea

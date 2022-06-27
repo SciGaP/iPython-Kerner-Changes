@@ -24,4 +24,6 @@ import java.util.List;
 
 public interface RunningNotebookRepository extends CrudRepository<RunningNotebookEntity, String> {
     public List<RunningNotebookEntity> findRunningNotebookEntityByNotebookIdAndActive(String notebookId, Boolean active);
+
+    public List<RunningNotebookEntity> findRunningNotebookEntityByActive(Boolean active);
 }

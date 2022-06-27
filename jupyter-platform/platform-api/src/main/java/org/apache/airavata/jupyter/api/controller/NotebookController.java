@@ -84,8 +84,13 @@ public class NotebookController extends DefaultErrorAttributes {
         return "SUCCESS";
     }
 
-    @GetMapping(path = "launched/{noteBookId}")
+    @GetMapping(path = "/launched/{noteBookId}")
     public List<RunningNotebookEntity> getRunningNotebookSessions(@PathVariable String noteBookId) {
         return rnbRepo.findRunningNotebookEntityByNotebookIdAndActive(noteBookId, true);
+    }
+
+    @GetMapping(path = "/launched")
+    public List<RunningNotebookEntity> getAllRunningNotebookSessions() {
+        return rnbRepo.findRunningNotebookEntityByActive(true);
     }
 }
