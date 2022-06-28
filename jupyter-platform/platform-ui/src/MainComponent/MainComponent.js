@@ -108,7 +108,7 @@ const MainComponent = () => {
       key: 'action',
       render: (record) => (
         <Space size="middle">
-          <Button>Delete</Button>
+          <button onClick={() => launchFromArchive(record)}>Launch Notebook</button>
         </Space>
       ),
     },
@@ -155,7 +155,35 @@ const MainComponent = () => {
       res.json().then((data) => setData2(data))
       );
   }, []);
-  
+
+
+  const launchFromArchive = (archive) =>  {
+    const data = {
+        name  : "Notebook from Archive : " + archive.description,
+        createdTime: Date().toLocaleString(),
+        cpu: 0.5,
+        memory: 1024,
+        archiveId: archive.id
+    }
+
+    fetch('http://localhost:8080/nb/', {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+        .then((res) =>
+            res.json().then(res => {
+              fetch("http://localhost:8080/nb/launch/" + res.id, {
+                method: 'GET',
+                headers: {
+                  'Content-type': 'application/json',
+                }}).then((res) => console.log(res)
+              );
+            }));
+  }
+
   const saveDB = () => {
     const data = {
       name: name,
@@ -163,8 +191,6 @@ const MainComponent = () => {
       cpu: cpu,
     };
 
-
-  
     fetch('http://127.0.0.1:5000', {
       method: 'POST',
       headers: {
