@@ -1,69 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input } from "antd";
-import { Space, Table } from 'antd';
+import { Table, Button, Modal, Form } from 'react-bootstrap';
 import 'antd/dist/antd.css';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const MainComponent = () => {
-  const [flag, setFlag] = useState(false);
-  const [name, setName] = useState("");
-  const [memory, setMemory] = useState("");
-  const [cpu, setCpu] = useState("");
-  const [response, setResponse] = useState(null);
   const [table_data1, setData] = useState([]);
   const [table_data2, setData2] = useState([]);
+  const [nb_name, setName] = useState([]);
 
-  const notebooks_table = [
-    {
-      title: 'Id',
-      dataIndex: 'id',
-      key: 'id',
-      render: (text) => <a>{text}</a>,
-    },
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Created Time',
-      dataIndex: 'createdTime',
-      key: 'createdTime',
-    },
-    {
-      title: 'CPU',
-      dataIndex: 'cpu',
-      key: 'cpu',
-    },
-    {
-      title: 'Memory',
-      dataIndex: 'memory',
-      key: 'memory',
-    },
-    {
-      title: 'Archive Id',
-      dataIndex: 'archiveId',
-      key: 'archiveId',
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (record) => (
-        <Space size="middle">
-          { record.launched
-              ? (<>
-                <button className='btn btn-primary' onClick={() => stopNotebook(record)}>Stop</button>
-                <button className='btn btn-primary' onClick={() => openNotebook(record)}>Open</button>
-              </>)
-              : <button className='btn btn-primary' onClick={() => launchNotebook(record)}>Launch</button>
-          }
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
-        </Space>
-      ),
-    },
-  ];
+  const handleModalLaunch = () => {
+    const data = {
+      name  : nb_name,
+      createdTime: Date().toLocaleString(),
+      cpu: 0.5,
+      memory: 1024
+    }
 
-  const launchNotebook = (record) => {
-    fetch("http://localhost:8080/nb/launch/" + record.id, {
+    fetch('http://localhost:8080/nb/', {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+        .then((res) =>
+            res.json().then(res => {
+              fetch("http://localhost:8080/nb/launch/" + res.id, {
+                method: 'GET',
+                headers: {
+                  'Content-type': 'application/json',
+                }}).then((res) => {
+                    console.log(res)
+                    handleClose()
+
+                  }
+              );
+            }));
+  }
+
+  const launchNotebook = (recordId) => {
+    fetch("http://localhost:8080/nb/launch/" + recordId, {
       method: 'GET',
       headers: {
         'Content-type': 'application/json',
@@ -86,33 +68,6 @@ const MainComponent = () => {
     );
 
   }
-
-  const archive_table = [
-    {
-      title: 'Archive ID',
-      dataIndex: 'id',
-      key: 'id',
-    },
-    {
-      title: 'Path',
-      dataIndex: 'path',
-      key: 'path',
-    },
-    {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (record) => (
-        <Space size="middle">
-          <button onClick={() => launchFromArchive(record)}>Launch Notebook</button>
-        </Space>
-      ),
-    },
-  ];
 
   useEffect(() => {
 
@@ -184,63 +139,93 @@ const MainComponent = () => {
             }));
   }
 
-  const saveDB = () => {
-    const data = {
-      name: name,
-      memory: memory,
-      cpu: cpu,
-    };
-
-    fetch('http://127.0.0.1:5000', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((res) =>
-      res.json().then(res => setResponse(res)));
-  };
   
   return (
     <>
-    {!response &&
-    <>
-    <Button type="primary" onClick={() => setFlag(true)}>
-        Create
+      <Button variant="primary" onClick={handleShow}>
+        Launch a Notebook
       </Button>
-      {flag && (
-        <>
-          <Input
-            placeholder="Name"
-            onChange={(Event) => setName(Event.target.value)}
+
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Launch Notebook</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Label htmlFor="nbNameLbt">Name</Form.Label>
+          <Form.Control
+              type="text"
+              id="nbName"
+              onChange={(Event) => setName(Event.target.value)}
           />
-          <Input
-            placeholder="Memory"
-            onChange={(Event) => setMemory(Event.target.value)}
-          />
-          <Input
-            placeholder="CPU"
-            onChange={(Event) => setCpu(Event.target.value)}
-          />
-          <Button type="primary" onClick={() => saveDB()}>
-            Submit
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
           </Button>
-        </>
-      )}
-    </>}
-      
-      {response && 
-      <>
-        <p>{`Name ${response.name}`}</p>
-        <p>{`Memory ${response.memory}`}</p>
-        <p>{`CPU ${response.cpu}`}</p>
-        </>
-         }
-        <div>Notebooks</div>
-        <Table columns={notebooks_table} dataSource={table_data1} />
-        <div>Archives</div>
-        <Table columns={archive_table} dataSource={table_data2} />
+          <Button variant="primary" onClick={handleModalLaunch}>
+            Launch
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <div>Notebooks</div>
+      <Table striped bordered hover>
+        <thead>
+        <tr>
+          <th>Notebook Id</th>
+          <th>Name</th>
+          <th>Created Time</th>
+          <th>CPU</th>
+          <th>Memory</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {
+          table_data1.map((item) => (
+            <tr key={item.id}>
+              <td>{item.id}</td>
+              <td>{item.name}</td>
+              <td>{item.createdTime}</td>
+              <td>{item.cpu}</td>
+              <td>{item.memory}</td>
+              <td>{ item.launched
+                  ? (<>
+                    <button className='btn btn-primary' onClick={() => stopNotebook(item)}>Stop</button>
+                    <button className='btn btn-primary' onClick={() => openNotebook(item)}>Open</button>
+                  </>)
+                  : <button className='btn btn-primary' onClick={() => launchNotebook(item.id)}>Launch</button>
+              }</td>
+            </tr>
+          ))
+        }
+        </tbody>
+      </Table>
+
+      <div>Archives</div>
+
+      <Table striped bordered hover>
+        <thead>
+        <tr>
+          <th>Archive Id</th>
+          <th>Path</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {
+          table_data2.map((item) => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
+                <td>{item.path}</td>
+                <td>{item.description}</td>
+                <td><button className='btn btn-primary' onClick={() => launchFromArchive(item)}>Launch Notebook</button></td>
+              </tr>
+          ))
+        }
+        </tbody>
+      </Table>
     </>
   );
 };
