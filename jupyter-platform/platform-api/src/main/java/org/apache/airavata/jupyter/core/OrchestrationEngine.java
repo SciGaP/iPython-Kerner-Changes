@@ -71,7 +71,7 @@ public class OrchestrationEngine {
                 List<RunningNotebookEntity> runningNotebooks = runningNotebookRepository
                         .findRunningNotebookEntityByNotebookIdAndActive(notebook.getId(), true);
 
-                if (!force) {
+                if (!force && runningNotebooks.size() > 0) {
                     logger.error("There are {} number of notebooks running under notebook id {}",
                             runningNotebooks.size(), notebook.getId());
                     throw new Exception("There are notebooks running for id " + notebook.getId());

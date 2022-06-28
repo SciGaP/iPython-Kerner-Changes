@@ -50,8 +50,11 @@ const MainComponent = () => {
       render: (record) => (
         <Space size="middle">
           { record.launched
-              ? <Button onClick={() => stopNotebook(record)}>Stop</Button>
-              : <Button onClick={() => launchNotebook(record)}>Launch</Button>
+              ? (<>
+                <button className='btn btn-primary' onClick={() => stopNotebook(record)}>Stop</button>
+                <button className='btn btn-primary' onClick={() => openNotebook(record)}>Open</button>
+              </>)
+              : <button className='btn btn-primary' onClick={() => launchNotebook(record)}>Launch</button>
           }
 
         </Space>
@@ -66,7 +69,11 @@ const MainComponent = () => {
         'Content-type': 'application/json',
       }}).then((res) => console.log(res)
     );
+  }
 
+  const openNotebook = (record) => {
+    var newPageUrl = "http://localhost:" + record.bindPort + "/?token=" + record.token;
+    window.open(newPageUrl, "_blank")
   }
 
 
@@ -79,8 +86,6 @@ const MainComponent = () => {
     );
 
   }
-
-
 
   const archive_table = [
     {
@@ -103,7 +108,7 @@ const MainComponent = () => {
       key: 'action',
       render: (record) => (
         <Space size="middle">
-          <Button onClick={() => run_deleteDB(record)}>Delete</Button>
+          <Button>Delete</Button>
         </Space>
       ),
     },
@@ -128,6 +133,8 @@ const MainComponent = () => {
               launched.forEach(launch => {
                 if (nb.id === launch.notebookId) {
                   nb["launched"] = true;
+                  nb["bindPort"] = launch.bindPort;
+                  nb["token"] = launch.token;
                 }
               })
             })
