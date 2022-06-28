@@ -82,13 +82,15 @@ class StateCaptureMagic(Magics):
 
         self.control_tracing(False)
 
-        parameters = line.split(" ")
+        parameters = line.split(",")
 
         createArchive = False
         uploadServer = None
         captureLocalContext = True
+        archiveName = ""
 
         for param in parameters:
+            param = param.strip()
             if param.startswith("createArchive"):
                 flag = param.split("=")[1]
                 if flag == "True":
@@ -96,6 +98,9 @@ class StateCaptureMagic(Magics):
 
             if param.startswith("uploadServer"):
                 uploadServer = param.split("=")[1]
+
+            if param.startswith("archiveName"):
+                archiveName = param.split("=")[1]
 
             if param.startswith("captureLocalCtx"):
                 flag = param.split("=")[1]
@@ -209,9 +214,35 @@ class StateCaptureMagic(Magics):
             print("Download the state export ")
             display(FileLink("ARCHIVE.zip"))
 
+            if uploadServer:
+                self.upload_to_server(uploadServer, archiveName)
+
+
         self.control_tracing(True)
 
         return {"accessed_files": list(accessed_files), "dependencies": dependencies}
+
+
+    def upload_to_server(self, base_url, archiveName):
+
+        headers={'Accept': 'application/json, text/plain, */*',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive'}
+
+        files = {'file': open('ARCHIVE.zip', 'rb')}
+        response = requests.post(base_url + "/archive/upload", data={}, headers=headers, files=files)
+        if response.status_code == 200:
+            response_json = response.json()
+            archive_json = {"path": response_json["path"],"description": archiveName}
+            headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+            response = requests.post(base_url + '/archive/', data=json.dumps(archive_json), headers=headers)
+            if response.status_code == 200:
+                print("Archive with name " + archive_json["description"] + " was uploaded")
+            else:
+                print("Failed to create archive metadata in server with status code " + str(response.status_code))
+        else:
+            print("Upload to server failed with code " + str(response.status_code))
 
     @line_magic
     def get_magic_out(self, command):

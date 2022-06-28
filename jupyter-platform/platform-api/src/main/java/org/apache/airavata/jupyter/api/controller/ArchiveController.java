@@ -24,15 +24,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 @RestController
 @RequestMapping(path = "/archive")
 public class ArchiveController {
     private static final Logger logger = LoggerFactory.getLogger(ArchiveController.class);
+
+    private String uploadPath = "/tmp/";
 
     @Autowired
     private ArchiveRepository archiveRepository;
@@ -55,5 +59,15 @@ public class ArchiveController {
     public ArchiveEntity getArchive(@PathVariable String archiveId) throws Exception{
         Optional<ArchiveEntity> byId = archiveRepository.findById(archiveId);
         return byId.orElseThrow(() -> new Exception("No archive found with id " + archiveId));
+    }
+
+    @PostMapping("/upload")
+    public Map<String, String> singleFileUpload(@RequestParam("file") MultipartFile file) throws Exception {
+
+        byte[] bytes = file.getBytes();
+        Path path = Paths.get(uploadPath + UUID.randomUUID().toString());
+        Files.write(path, bytes);
+
+        return Collections.singletonMap("path", path.toAbsolutePath().toString());
     }
 }
