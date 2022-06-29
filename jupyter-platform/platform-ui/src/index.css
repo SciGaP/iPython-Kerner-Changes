@@ -11,6 +11,9 @@
 /*  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',*/
 /*    monospace;*/
 /*}*/
+table{
+    font-size: 14px;
+}
 
 button {
     margin-right: 5px !important;

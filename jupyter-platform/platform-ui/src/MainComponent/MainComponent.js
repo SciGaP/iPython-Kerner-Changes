@@ -194,13 +194,13 @@ const MainComponent = () => {
                 </Modal.Footer>
             </Modal>
 
-            <div className="w-100 d-flex flex-row">
+            <div className="w-100 d-flex flex-row pb-3">
                 <h2 className="flex-fill">Notebooks</h2>
-                <Button variant="primary" onClick={handleShow}>
-                    Launch a Notebook
+                <Button variant="dark" onClick={handleShow}>
+                    <i className='fa fa-plus-circle'></i> Launch a Notebook
                 </Button>
             </div>
-            <table className="table">
+            <table className="table table-striped table-sm align-middle">
                 <thead>
                 <tr>
                     <th>Notebook Id</th>
@@ -214,7 +214,7 @@ const MainComponent = () => {
                 <tbody>
                 {
                     table_data1.map((item) => (
-                        <tr key={item.id}>
+                        <tr key={item.id} className='align-items-center'>
                             <td>{item.id}</td>
                             <td>{item.name}</td>
                             <td>{item.createdTime}</td>
@@ -229,13 +229,14 @@ const MainComponent = () => {
                                               aria-hidden="true"/>
                                             Stopping
                                         </button>) :
-                                        (<button className=' btn btn-sm btn-primary '
+                                        (<button className=' btn btn-sm btn-danger '
                                                  onClick={() => stopNotebook(item)}>
-                                            Stop
+                                            <i className='fa fa-stop'></i> Stop
                                         </button>)
                                     }
 
-                                    <button className=' btn btn-sm btn-primary ' onClick={() => openNotebook(item)}>Open
+                                    <button className=' btn btn-sm btn-primary ' onClick={() => openNotebook(item)}>
+                                    <i className='fa fa-chevron-circle-right'></i> Open
                                     </button>
                                 </>) :
                                 !!notebookLaunchProcessing[item.id] ?
@@ -245,9 +246,9 @@ const MainComponent = () => {
                                               aria-hidden="true"/>
                                         Launching
                                     </button>) :
-                                    (<button className=' btn btn-sm btn-primary '
+                                    (<button className=' btn btn-sm btn-dark '
                                              onClick={() => launchNotebook(item.id)}>
-                                        Launch
+                                        <i className='fa fa-share'></i> Launch
                                     </button>)
                             }</td>
                         </tr>
@@ -256,11 +257,11 @@ const MainComponent = () => {
                 </tbody>
             </table>
 
-            <div className="w-100">
+            <div className="w-100 py-3">
                 <h2>Archives</h2>
             </div>
 
-            <table className="table">
+            <table className="table table-striped table-sm align-middle">
                 <thead>
                 <tr>
                     <th>Archive Id</th>
@@ -284,9 +285,9 @@ const MainComponent = () => {
                                               aria-hidden="true"/>
                                         Launching
                                     </button>) :
-                                    (<button className=' btn btn-sm btn-primary '
+                                    (<button className=' btn btn-sm btn-dark '
                                              onClick={() => launchFromArchive(item)}>
-                                        Launch
+                                        <i className='fa fa-share'></i> Launch
                                     </button>)
                                 }
                             </td>

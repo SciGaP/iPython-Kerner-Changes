@@ -12,7 +12,7 @@ function App() {
                     Airavata Jupyter Platform
                 </a>
             </nav>
-            <div className="w-100 p-3">
+            <div className="w-100 px-4 py-3">
                 <MainComponent/>
             </div>
         </div>
