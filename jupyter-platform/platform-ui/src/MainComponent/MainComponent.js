@@ -59,10 +59,7 @@ const MainComponent = () => {
             }
         }).then((res) => {
             console.log(res)
-            refreshNotebooks();
-            setNotebookLaunchProcessing({...notebookLaunchProcessing, [recordId]: false});
         }).catch(() => {
-            setNotebookLaunchProcessing({...notebookLaunchProcessing, [recordId]: false});
         });
     }
 
@@ -82,10 +79,7 @@ const MainComponent = () => {
             }
         }).then((res) => {
             console.log(res)
-            refreshNotebooks();
-            setNotebookStopProcessing({...notebookStopProcessing, [record.id]: false});
         }).catch(() => {
-            setNotebookStopProcessing({...notebookStopProcessing, [record.id]: false});
         });
 
     }
@@ -124,6 +118,26 @@ const MainComponent = () => {
         );
     };
 
+    const refreshLaunchedNotebooks = () => {
+        fetch("http://localhost:8080/nb/launched/", {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/json',
+            }
+        }).then((res) =>
+            res.json().then((launched) => {
+                const launchedNotebookIds = launched.map(({notebookId}) => notebookId);
+                table_data1.forEach(nb => {
+                    if (launchedNotebookIds.indexOf(nb.id) >= 0) {
+                        setNotebookLaunchProcessing({...notebookLaunchProcessing, [nb.id]: false});
+                    } else {
+                        setNotebookStopProcessing({...notebookStopProcessing, [nb.id]: false});
+                    }
+                })
+            })
+        );
+    }
+
     const refreshArchives = () => {
         fetch("http://localhost:8080/archive/", {
             method: 'GET',
@@ -138,6 +152,12 @@ const MainComponent = () => {
     useEffect(() => {
         refreshNotebooks();
         refreshArchives();
+
+        setInterval(() => {
+            refreshNotebooks();
+            refreshLaunchedNotebooks();
+            refreshArchives();
+        }, 10000);
     }, []);
 
 
@@ -236,7 +256,7 @@ const MainComponent = () => {
                                     }
 
                                     <button className=' btn btn-sm btn-primary ' onClick={() => openNotebook(item)}>
-                                    <i className='fa fa-chevron-circle-right'></i> Open
+                                        <i className='fa fa-chevron-circle-right'></i> Open
                                     </button>
                                 </>) :
                                 !!notebookLaunchProcessing[item.id] ?
