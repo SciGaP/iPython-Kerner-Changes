@@ -8,9 +8,15 @@ const MainComponent = () => {
     const [table_data2, setData2] = useState([]);
     const [nb_name, setName] = useState([]);
 
+    const [selected_archive, setSelectedArchive] = useState([]);
+
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    const [showLaunchingFromArchive, setShowLaunchingFromArchive] = useState(false);
+    const handleCloseLaunchingFromArchive = () => setShowLaunchingFromArchive(false);
+    const handleShowLaunchingFromArchive = () => setShowLaunchingFromArchive(true);
 
     const [notebookStopProcessing, setNotebookStopProcessing] = useState({});
     const [notebookLaunchProcessing, setNotebookLaunchProcessing] = useState({});
@@ -151,12 +157,17 @@ const MainComponent = () => {
 
 
     const launchFromArchive = (archive) => {
+        setSelectedArchive(archive);
+        handleShowLaunchingFromArchive();
+    }
+
+    const handleLaunchFromArchive = (archive) => {
         const data = {
-            name: "Notebook from Archive : " + archive.description,
+            name: nb_name + ". Created from Archive : " + selected_archive.description,
             createdTime: Date().toLocaleString(),
             cpu: 0.5,
             memory: 1024,
-            archiveId: archive.id
+            archiveId: selected_archive.id
         }
 
 
@@ -173,8 +184,10 @@ const MainComponent = () => {
                 refreshNotebooks();
                 launchNotebook(res.id);
                 setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: false});
+                handleCloseLaunchingFromArchive();
             }).catch(() => {
                 setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: false});
+                handleCloseLaunchingFromArchive();
             }));
     }
 
@@ -198,6 +211,28 @@ const MainComponent = () => {
                         Close
                     </Button>
                     <Button variant="primary" onClick={handleModalLaunch}>
+                        Launch
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showLaunchingFromArchive} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Launch Notebook</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Label htmlFor="nbNameLbt">Name</Form.Label>
+                    <Form.Control
+                        type="text"
+                        id="nbName"
+                        onChange={(Event) => setName(Event.target.value)}
+                    />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseLaunchingFromArchive}>
+                        Close
+                    </Button>
+                    <Button variant="primary" onClick={handleLaunchFromArchive}>
                         Launch
                     </Button>
                 </Modal.Footer>
