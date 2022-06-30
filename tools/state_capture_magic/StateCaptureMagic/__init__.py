@@ -17,6 +17,7 @@ import io
 from IPython.display import FileLink
 from pathlib import Path
 import shutil
+from os.path import exists
 
 import re
 import ipykernel
@@ -178,7 +179,7 @@ class StateCaptureMagic(Magics):
             os.mkdir(archive_dir)
 
             for f in accessed_files:
-                if not f == "":
+                if not f == "" and exists(f):
                     letters = string.ascii_lowercase
                     random_name = ''.join(random.choice(letters) for i in range(10));
                     archive_dict[random_name] = f
