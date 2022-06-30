@@ -217,7 +217,7 @@ const MainComponent = () => {
             <div className="w-100 d-flex flex-row pb-3">
                 <h2 className="flex-fill">Notebooks</h2>
                 <Button variant="dark" onClick={handleShow}>
-                    <i className='fa fa-plus-circle'></i> Launch a Notebook
+                    <i className='fa fa-plus-circle'/> Launch a Notebook
                 </Button>
             </div>
             <table className="table table-striped table-sm align-middle">
@@ -243,7 +243,7 @@ const MainComponent = () => {
                             <td>{item.launched
                                 ? (<>
                                     {!!notebookStopProcessing[item.id] ?
-                                        (<button className=' btn btn-sm btn-primary ' disabled={true}
+                                        (<button className=' btn btn-sm btn-danger ' disabled={true}
                                                  onClick={() => stopNotebook(item)}>
                                         <span className="spinner-border spinner-border-sm" role="status"
                                               aria-hidden="true"/>
@@ -251,16 +251,16 @@ const MainComponent = () => {
                                         </button>) :
                                         (<button className=' btn btn-sm btn-danger '
                                                  onClick={() => stopNotebook(item)}>
-                                            <i className='fa fa-stop'></i> Stop
+                                            <i className='fa fa-stop'/> Stop
                                         </button>)
                                     }
 
                                     <button className=' btn btn-sm btn-primary ' onClick={() => openNotebook(item)}>
-                                        <i className='fa fa-chevron-circle-right'></i> Open
+                                        <i className='fa fa-chevron-circle-right'/> Open
                                     </button>
                                 </>) :
                                 !!notebookLaunchProcessing[item.id] ?
-                                    (<button className=' btn btn-sm btn-primary ' disabled={true}
+                                    (<button className=' btn btn-sm btn-dark ' disabled={true}
                                              onClick={() => launchNotebook(item.id)}>
                                         <span className="spinner-border spinner-border-sm" role="status"
                                               aria-hidden="true"/>
@@ -268,7 +268,7 @@ const MainComponent = () => {
                                     </button>) :
                                     (<button className=' btn btn-sm btn-dark '
                                              onClick={() => launchNotebook(item.id)}>
-                                        <i className='fa fa-share'></i> Launch
+                                        <i className='fa fa-share'/> Launch
                                     </button>)
                             }</td>
                         </tr>
@@ -299,7 +299,7 @@ const MainComponent = () => {
                             <td>{item.description}</td>
                             <td>
                                 {!!archiveLaunchProcessing[item.id] ?
-                                    (<button className=' btn btn-sm btn-primary' disabled={true}
+                                    (<button className=' btn btn-sm btn-dark' disabled={true}
                                              onClick={() => launchFromArchive(item)}>
                                         <span className="spinner-border spinner-border-sm" role="status"
                                               aria-hidden="true"/>
@@ -307,7 +307,7 @@ const MainComponent = () => {
                                     </button>) :
                                     (<button className=' btn btn-sm btn-dark '
                                              onClick={() => launchFromArchive(item)}>
-                                        <i className='fa fa-share'></i> Launch
+                                        <i className='fa fa-share'/> Launch
                                     </button>)
                                 }
                             </td>
