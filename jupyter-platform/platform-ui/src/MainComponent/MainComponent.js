@@ -228,10 +228,7 @@ const MainComponent = () => {
                             <td>{item.name}</td>
                             <td>{item.createdTime}</td>
                             <td>{item.cpu}</td>
-                            <td>{item.memory}
-                                <br/>launching : {notebookLaunchProcessing[item.id] ? "true" : "false"}
-                                <br/>Stopping : {notebookStopProcessing[item.id] ? "true" : "false"}
-                            </td>
+                            <td>{item.memory}</td>
                             <td>{item.launched
                                 ? (<>
                                     {!!notebookStopProcessing[item.id] ?
