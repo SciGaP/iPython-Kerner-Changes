@@ -107,7 +107,15 @@ const MainComponent = () => {
                                     nb["bindPort"] = launch.bindPort;
                                     nb["token"] = launch.token;
                                 }
-                            })
+                            });
+
+                            if (nb["launched"] && notebookLaunchProcessing[nb.id]) {
+                                setNotebookLaunchProcessing({...notebookLaunchProcessing, [nb.id]: false});
+                            }
+
+                            if (!nb["launched"] && notebookStopProcessing[nb.id]) {
+                                setNotebookStopProcessing({...notebookStopProcessing, [nb.id]: false});
+                            }
                         })
 
                         setData(nbs)
@@ -117,26 +125,6 @@ const MainComponent = () => {
             })
         );
     };
-
-    const refreshLaunchedNotebooks = () => {
-        fetch("http://localhost:8080/nb/launched/", {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json',
-            }
-        }).then((res) =>
-            res.json().then((launched) => {
-                const launchedNotebookIds = launched.map(({notebookId}) => notebookId);
-                table_data1.forEach(nb => {
-                    if (launchedNotebookIds.indexOf(nb.id) >= 0) {
-                        setNotebookLaunchProcessing({...notebookLaunchProcessing, [nb.id]: false});
-                    } else {
-                        setNotebookStopProcessing({...notebookStopProcessing, [nb.id]: false});
-                    }
-                })
-            })
-        );
-    }
 
     const refreshArchives = () => {
         fetch("http://localhost:8080/archive/", {
@@ -153,12 +141,13 @@ const MainComponent = () => {
         refreshNotebooks();
         refreshArchives();
 
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             refreshNotebooks();
-            refreshLaunchedNotebooks();
             refreshArchives();
         }, 10000);
-    }, []);
+
+        return () => clearInterval(intervalId);
+    }, [notebookLaunchProcessing, notebookStopProcessing, useState]);
 
 
     const launchFromArchive = (archive) => {
@@ -239,7 +228,10 @@ const MainComponent = () => {
                             <td>{item.name}</td>
                             <td>{item.createdTime}</td>
                             <td>{item.cpu}</td>
-                            <td>{item.memory}</td>
+                            <td>{item.memory}
+                                <br/>launching : {notebookLaunchProcessing[item.id] ? "true" : "false"}
+                                <br/>Stopping : {notebookStopProcessing[item.id] ? "true" : "false"}
+                            </td>
                             <td>{item.launched
                                 ? (<>
                                     {!!notebookStopProcessing[item.id] ?
