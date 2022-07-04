@@ -6,23 +6,31 @@ import {
     BrowserRouter,
     Routes,
     Route,
-    Link
+    Navigate,
+    NavLink
 } from "react-router-dom";
 import Callback from "./pages/Callback";
 import {useEffect, useState} from "react";
+import Home from "./pages/Home";
 
 function App() {
     const [loginUrl, setLoginUrl] = useState(null);
     const [authenticated, setAuthenticated] = useState(false);
     const [authenticatedUser, setAuthenticatedUser] = useState(null);
 
+    const checkAuthentication = () => {
+        if (custosService.identity.authenticated()) {
+            setAuthenticated(true);
+        } else {
+            setAuthenticated(false);
+        }
+    }
+
     useEffect(() => {
+        checkAuthentication();
+
         const intervalId = setInterval(() => {
-            if (custosService.identity.authenticated()) {
-                setAuthenticated(true);
-            } else {
-                setAuthenticated(false);
-            }
+            checkAuthentication();
         }, 2000);
 
         return () => clearInterval(intervalId);
@@ -53,9 +61,9 @@ function App() {
     }
 
     return (
-        <div className="w-100">
+        <div className="w-100 h-100 d-flex flex-column">
             <nav className="navbar navbar-dark bg-dark pl-3 pr-3">
-                <a className="navbar-brand" href="#">
+                <a href="/" className="navbar-brand" href="#">
                     <img src={logo} width="30" height="30"
                          className="d-inline-block align-top" alt=""/>
                     Airavata Jupyter Platform
@@ -72,6 +80,8 @@ function App() {
                                     (<span>Loading...</span>)
                                 }
                             </div>
+
+                            <a className="btn btn-outline-info" href="/dashboard">Dashboard</a>
                             <a className="btn btn-outline-light" href={"#"} onClick={clickLogout}>Logout</a>
                         </div>) :
                         (<div>
@@ -81,11 +91,16 @@ function App() {
                 </div>
             </nav>
 
-            <div className="w-100 px-4 py-3">
+            <div className="w-100 px-4 py-3 flex-fill">
                 <BrowserRouter>
                     <Routes>
                         <Route path="/callback" element={<Callback/>}/>
-                        <Route path="/" element={<MainComponent/>}/>
+                        <Route path="/dashboard" element={<MainComponent/>}/>
+                        <Route path="/" element={<Home/>}/>
+                        <Route
+                            path="*"
+                            element={<Navigate to="/" replace/>}
+                        />
                     </Routes>
                 </BrowserRouter>
             </div>

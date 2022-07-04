@@ -2,8 +2,11 @@ import React, {useState, useEffect} from "react";
 import {Table, Button, Modal, Form} from 'react-bootstrap';
 import 'antd/dist/antd.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {custosService} from "../custos-service";
+import {useNavigate} from "react-router-dom";
 
 const MainComponent = () => {
+    const navigate = useNavigate();
     const [table_data1, setData] = useState([]);
     const [table_data2, setData2] = useState([]);
     const [nb_name, setName] = useState([]);
@@ -15,6 +18,22 @@ const MainComponent = () => {
     const [notebookStopProcessing, setNotebookStopProcessing] = useState({});
     const [notebookLaunchProcessing, setNotebookLaunchProcessing] = useState({});
     const [archiveLaunchProcessing, setArchiveLaunchProcessing] = useState({});
+
+    const checkAuthentication = () => {
+        if (!custosService.identity.authenticated()) {
+            navigate("/");
+        }
+    }
+
+    useEffect(() => {
+        checkAuthentication();
+
+        const intervalId = setInterval(() => {
+            checkAuthentication();
+        }, 2000);
+
+        return () => clearInterval(intervalId);
+    }, [useState])
 
     const handleModalLaunch = async () => {
         const data = {

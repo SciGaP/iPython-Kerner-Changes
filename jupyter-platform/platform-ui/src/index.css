@@ -15,6 +15,6 @@ table{
     font-size: 14px;
 }
 
-button {
-    margin-right: 5px !important;
+button, a.btn {
+    margin-right: 10px !important;
 }
