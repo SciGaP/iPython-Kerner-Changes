@@ -17,12 +17,23 @@
 
 package org.apache.airavata.jupyter.api;
 
+import org.apache.custos.clients.CustosClientProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+    }
+
+
+    @Bean
+    public CustosClientProvider custosClientsFactory() {
+        return new CustosClientProvider.Builder().setServerHost("prod.custos.scigap.org")
+                .setServerPort(443)
+                .setClientId("CHANGE_ME")
+                .setClientSec("CHANGE_ME").build();
     }
 }
