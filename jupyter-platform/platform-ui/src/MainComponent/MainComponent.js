@@ -16,7 +16,7 @@ const MainComponent = () => {
     const [notebookLaunchProcessing, setNotebookLaunchProcessing] = useState({});
     const [archiveLaunchProcessing, setArchiveLaunchProcessing] = useState({});
 
-    const handleModalLaunch = () => {
+    const handleModalLaunch = async () => {
         const data = {
             name: nb_name,
             createdTime: Date().toLocaleString(),
@@ -24,29 +24,16 @@ const MainComponent = () => {
             memory: 1024
         }
 
-        fetch('http://localhost:8080/nb/', {
+        const res = await fetch('http://localhost:8080/nb/', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
             },
             body: JSON.stringify(data),
-        })
-            .then((res) =>
-                res.json().then(res => {
-                    fetch("http://localhost:8080/nb/launch/" + res.id, {
-                        method: 'GET',
-                        headers: {
-                            'Content-type': 'application/json',
-                        }
-                    }).then((res) => {
-                            console.log(res)
-                            handleClose()
-
-                            refreshNotebooks();
-
-                        }
-                    );
-                }));
+        });
+        const nb = await res.json();
+        launchNotebook(nb.id);
+        handleClose();
     }
 
     const launchNotebook = (recordId) => {
