@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import {Table, Button, Modal, Form} from 'react-bootstrap';
 import 'antd/dist/antd.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {custosService} from "../custos-service";
 
 const MainComponent = () => {
     const [table_data1, setData] = useState([]);
@@ -43,6 +44,7 @@ const MainComponent = () => {
                         method: 'GET',
                         headers: {
                             'Content-type': 'application/json',
+                            'Authorization': `Bearer ${custosService.identity.accessToken}`
                         }
                     }).then((res) => {
                             console.log(res)
@@ -62,6 +64,7 @@ const MainComponent = () => {
             method: 'GET',
             headers: {
                 'Content-type': 'application/json',
+                'Authorization': `Bearer ${custosService.identity.accessToken}`
             }
         }).then((res) => {
             console.log(res)
@@ -82,6 +85,7 @@ const MainComponent = () => {
             method: 'GET',
             headers: {
                 'Content-type': 'application/json',
+                'Authorization': `Bearer ${custosService.identity.accessToken}`
             }
         }).then((res) => {
             console.log(res)
@@ -95,6 +99,7 @@ const MainComponent = () => {
             method: 'GET',
             headers: {
                 'Content-type': 'application/json',
+                'Authorization': `Bearer ${custosService.identity.accessToken}`
             }
         }).then((res) =>
             res.json().then((nbs) => {
@@ -103,6 +108,7 @@ const MainComponent = () => {
                     method: 'GET',
                     headers: {
                         'Content-type': 'application/json',
+                        'Authorization': `Bearer ${custosService.identity.accessToken}`
                     }
                 }).then((res) =>
                     res.json().then((launched) => {
@@ -137,6 +143,7 @@ const MainComponent = () => {
             method: 'GET',
             headers: {
                 'Content-type': 'application/json',
+                'Authorization': `Bearer ${custosService.identity.accessToken}`
             }
         }).then((res) =>
             res.json().then((data) => setData2(data))
@@ -177,6 +184,7 @@ const MainComponent = () => {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
+                'Authorization': `Bearer ${custosService.identity.accessToken}`
             },
             body: JSON.stringify(data),
         }).then((res) =>
