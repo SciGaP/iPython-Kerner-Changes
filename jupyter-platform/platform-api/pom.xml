@@ -102,6 +102,12 @@
             <artifactId>jaxb-impl</artifactId>
             <version>2.3.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.custos</groupId>
+            <artifactId>custos-java-sdk</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>
