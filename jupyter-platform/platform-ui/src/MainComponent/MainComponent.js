@@ -54,6 +54,7 @@ const MainComponent = () => {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json',
+                    'Authorization': `Bearer ${custosService.identity.accessToken}`
                 },
                 body: JSON.stringify(data),
             });
@@ -205,9 +206,9 @@ const MainComponent = () => {
                 },
                 body: JSON.stringify(data),
             });
-            const nb = res.json();
+            const nb = await res.json();
             refreshNotebooks();
-            launchNotebook(res.id);
+            launchNotebook(nb.id);
             setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: false});
             handleCloseLaunchingFromArchive();
         } catch(e) {

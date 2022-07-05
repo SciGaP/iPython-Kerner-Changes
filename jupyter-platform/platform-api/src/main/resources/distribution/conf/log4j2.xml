@@ -43,6 +43,9 @@
         <logger name="org.apache.helix" level="WARN"/>
         <logger name="org.apache.zookeeper" level="ERROR"/>
         <logger name="org.apache.airavata" level="INFO"/>
+        <logger name="zipkin2.reporter.AsyncReporter$BoundedAsyncReporter" level="ERROR"/>
+        <logger name="org.springframework.cloud.sleuth.zipkin2.sender.RestTemplateSender" level="ERROR"/>
+        <logger name="io.grpc.internal.ManagedChannelOrphanWrapper" level="OFF"/>
         <logger name="org.hibernate" level="ERROR"/>
         <logger name="org.apache.coyote.http11" level="ERROR"/>
         <Root level="INFO">

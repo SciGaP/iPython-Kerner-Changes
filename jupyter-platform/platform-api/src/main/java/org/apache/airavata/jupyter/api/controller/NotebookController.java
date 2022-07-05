@@ -25,10 +25,9 @@ import org.apache.airavata.jupyter.core.OrchestrationEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
 
 import javax.ws.rs.QueryParam;
 import java.util.ArrayList;
@@ -52,13 +51,13 @@ public class NotebookController extends DefaultErrorAttributes {
     private OrchestrationEngine orchestrationEngine;
 
     @PostMapping(path = "/", consumes = "application/json", produces = "application/json")
-    public NotebookEntity createNotebook(@RequestBody NotebookEntity notebookEntity) {
+    public NotebookEntity createNotebook(Authentication authentication, @RequestBody NotebookEntity notebookEntity) {
         NotebookEntity saved = nbRepo.save(notebookEntity);
         return saved;
     }
 
     @GetMapping(path = "/")
-    public List<NotebookEntity> listCreatedNotebooks() {
+    public List<NotebookEntity> listCreatedNotebooks(Authentication authentication) {
         Iterable<NotebookEntity> allNotebooks = nbRepo.findAll();
         List<NotebookEntity> nbs = new ArrayList<>();
         allNotebooks.forEach(nbs::add);
@@ -66,7 +65,7 @@ public class NotebookController extends DefaultErrorAttributes {
     }
 
     @GetMapping(path = "/launch/{noteBookId}")
-    public String launchNotebook(@PathVariable String noteBookId, @QueryParam(value = "force") boolean force) throws Exception {
+    public String launchNotebook(Authentication authentication, @PathVariable String noteBookId, @QueryParam(value = "force") boolean force) throws Exception {
         Optional<NotebookEntity> notebookOp = nbRepo.findById(noteBookId);
         try {
             orchestrationEngine.launchNotebook(notebookOp.get(), force);
@@ -78,19 +77,19 @@ public class NotebookController extends DefaultErrorAttributes {
     }
 
     @GetMapping(path = "/kill/{noteBookId}")
-    public String killNotebook(@PathVariable String noteBookId) {
+    public String killNotebook(Authentication authentication, @PathVariable String noteBookId) {
         Optional<NotebookEntity> notebookOp = nbRepo.findById(noteBookId);
         orchestrationEngine.killNotebook(notebookOp.get());
         return "SUCCESS";
     }
 
     @GetMapping(path = "/launched/{noteBookId}")
-    public List<RunningNotebookEntity> getRunningNotebookSessions(@PathVariable String noteBookId) {
+    public List<RunningNotebookEntity> getRunningNotebookSessions(Authentication authentication, @PathVariable String noteBookId) {
         return rnbRepo.findRunningNotebookEntityByNotebookIdAndActive(noteBookId, true);
     }
 
     @GetMapping(path = "/launched")
-    public List<RunningNotebookEntity> getAllRunningNotebookSessions() {
+    public List<RunningNotebookEntity> getAllRunningNotebookSessions(Authentication authentication) {
         return rnbRepo.findRunningNotebookEntityByActive(true);
     }
 }

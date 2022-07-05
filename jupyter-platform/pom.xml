@@ -36,7 +36,7 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <spring.boot>2.7.0</spring.boot>
+        <spring.boot>2.2.0.RELEASE</spring.boot>
         <h2>1.4.191</h2>
         <org.slf4j.version>1.7.25</org.slf4j.version>
         <log4j2.version>2.16.0</log4j2.version>

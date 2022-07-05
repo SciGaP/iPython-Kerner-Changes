@@ -17,7 +17,10 @@
 
 package org.apache.airavata.jupyter.api;
 
+import org.apache.airavata.jupyter.api.auth.AuthCache;
+import org.apache.airavata.jupyter.api.auth.Authenticator;
 import org.apache.airavata.jupyter.core.OrchestrationEngine;
+import org.apache.custos.clients.CustosClientProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,11 +31,35 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class Config implements WebMvcConfigurer {
 
+    @org.springframework.beans.factory.annotation.Value("${custos.host}")
+    private String custosHost;
+
+    @org.springframework.beans.factory.annotation.Value("${custos.port}")
+    private int custosPort;
+
+    @org.springframework.beans.factory.annotation.Value("${custos.client.id}")
+    private String custosClientId;
+
+    @org.springframework.beans.factory.annotation.Value("${custos.client.secret}")
+    private String custosClientSecret;
+
     @Bean
     OrchestrationEngine orchestrationEngine() {
         return new OrchestrationEngine();
     }
 
+    @Bean
+    AuthCache authCache() {
+        return new AuthCache();
+    }
+
+    @Bean
+    public CustosClientProvider custosClientsFactory() {
+        return new CustosClientProvider.Builder().setServerHost(custosHost)
+                .setServerPort(custosPort)
+                .setClientId(custosClientId)
+                .setClientSec(custosClientSecret).build();
+    }
 
     @Autowired
     private Authenticator authenticator;
@@ -44,6 +71,6 @@ public class Config implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authenticator).addPathPatterns("/**");
+        registry.addInterceptor(authenticator).excludePathPatterns("/archive/**");
     }
 }

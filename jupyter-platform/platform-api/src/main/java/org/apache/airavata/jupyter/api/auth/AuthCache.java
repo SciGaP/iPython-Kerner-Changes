@@ -15,14 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.jupyter.api;
+package org.apache.airavata.jupyter.api.auth;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.core.Authentication;
 
-@SpringBootApplication
-public class Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class AuthCache {
+    private final Map<String, Authentication> authCache = new ConcurrentHashMap<>();
+
+    public Authentication getAuthentication(String token) {
+        return authCache.get(token);
+    }
+
+    public void cacheAuthentication(String token, Authentication authentication) {
+        authCache.put(token, authentication);
     }
 }
