@@ -49,31 +49,36 @@ const MainComponent = () => {
             memory: 1024
         }
 
-        const res = await fetch('http://localhost:8080/nb/', {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-        const nb = await res.json();
-        launchNotebook(nb.id);
-        handleClose();
+        try {
+            const res = await fetch('http://localhost:8080/nb/', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+            const nb = await res.json();
+            launchNotebook(nb.id);
+            handleClose();
+        } catch (e) {
+            // TODO
+        }
     }
 
-    const launchNotebook = (recordId) => {
+    const launchNotebook = async (recordId) => {
         setNotebookLaunchProcessing({...notebookLaunchProcessing, [recordId]: true});
 
-        fetch("http://localhost:8080/nb/launch/" + recordId, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json',
-                'Authorization': `Bearer ${custosService.identity.accessToken}`
-            }
-        }).then((res) => {
-            console.log(res)
-        }).catch(() => {
-        });
+        try {
+            await fetch("http://localhost:8080/nb/launch/" + recordId, {
+                method: 'GET',
+                headers: {
+                    'Content-type': 'application/json',
+                    'Authorization': `Bearer ${custosService.identity.accessToken}`
+                }
+            });
+        } catch (e) {
+            // TODO
+        }
     }
 
     const openNotebook = (record) => {
@@ -82,76 +87,83 @@ const MainComponent = () => {
     }
 
 
-    const stopNotebook = (record) => {
+    const stopNotebook = async (record) => {
         setNotebookStopProcessing({...notebookStopProcessing, [record.id]: true});
 
-        fetch("http://localhost:8080/nb/kill/" + record.id, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json',
-                'Authorization': `Bearer ${custosService.identity.accessToken}`
-            }
-        }).then((res) => {
-            console.log(res)
-        }).catch(() => {
-        });
+        try {
+            await fetch("http://localhost:8080/nb/kill/" + record.id, {
+                method: 'GET',
+                headers: {
+                    'Content-type': 'application/json',
+                    'Authorization': `Bearer ${custosService.identity.accessToken}`
+                }
+            })
+        } catch (e) {
+            // TODO
+        }
 
     }
 
-    const refreshNotebooks = () => {
-        fetch("http://localhost:8080/nb/", {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json',
-                'Authorization': `Bearer ${custosService.identity.accessToken}`
-            }
-        }).then((res) =>
-            res.json().then((nbs) => {
-
+    const refreshNotebooks = async () => {
+        try {
+            let res = await Promise.all([
+                fetch("http://localhost:8080/nb/", {
+                    method: 'GET',
+                    headers: {
+                        'Content-type': 'application/json',
+                        'Authorization': `Bearer ${custosService.identity.accessToken}`
+                    }
+                }),
                 fetch("http://localhost:8080/nb/launched/", {
                     method: 'GET',
                     headers: {
                         'Content-type': 'application/json',
                         'Authorization': `Bearer ${custosService.identity.accessToken}`
                     }
-                }).then((res) =>
-                    res.json().then((launched) => {
-                        nbs.forEach(nb => {
-                            launched.forEach(launch => {
-                                if (nb.id === launch.notebookId) {
-                                    nb["launched"] = true;
-                                    nb["bindPort"] = launch.bindPort;
-                                    nb["token"] = launch.token;
-                                }
-                            });
+                })
+            ]);
 
-                            if (nb["launched"] && notebookLaunchProcessing[nb.id]) {
-                                setNotebookLaunchProcessing({...notebookLaunchProcessing, [nb.id]: false});
-                            }
+            const nbs = await res[0].json();
+            const launched = await res[1].json();
 
-                            if (!nb["launched"] && notebookStopProcessing[nb.id]) {
-                                setNotebookStopProcessing({...notebookStopProcessing, [nb.id]: false});
-                            }
-                        })
+            nbs.forEach(nb => {
+                launched.forEach(launch => {
+                    if (nb.id === launch.notebookId) {
+                        nb["launched"] = true;
+                        nb["bindPort"] = launch.bindPort;
+                        nb["token"] = launch.token;
+                    }
+                });
 
-                        setData(nbs)
-                    })
-                );
+                if (nb["launched"] && notebookLaunchProcessing[nb.id]) {
+                    setNotebookLaunchProcessing({...notebookLaunchProcessing, [nb.id]: false});
+                }
 
-            })
-        );
+                if (!nb["launched"] && notebookStopProcessing[nb.id]) {
+                    setNotebookStopProcessing({...notebookStopProcessing, [nb.id]: false});
+                }
+            });
+
+            setData(nbs);
+        } catch (e) {
+            // TODO
+        }
     };
 
-    const refreshArchives = () => {
-        fetch("http://localhost:8080/archive/", {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json',
-                'Authorization': `Bearer ${custosService.identity.accessToken}`
-            }
-        }).then((res) =>
-            res.json().then((data) => setData2(data))
-        );
+    const refreshArchives = async () => {
+        try {
+            const res = await fetch("http://localhost:8080/archive/", {
+                method: 'GET',
+                headers: {
+                    'Content-type': 'application/json',
+                    'Authorization': `Bearer ${custosService.identity.accessToken}`
+                }
+            });
+            const archives = await res.json();
+            setData2(archives);
+        } catch (e) {
+            // TODO
+        }
     };
 
     useEffect(() => {
@@ -172,7 +184,7 @@ const MainComponent = () => {
         handleShowLaunchingFromArchive();
     }
 
-    const handleLaunchFromArchive = (archive) => {
+    const handleLaunchFromArchive = async (archive) => {
         const data = {
             name: nb_name + ". Created from Archive : " + selected_archive.description,
             createdTime: Date().toLocaleString(),
@@ -184,28 +196,28 @@ const MainComponent = () => {
 
         setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: true});
 
-        fetch('http://localhost:8080/nb/', {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
-                'Authorization': `Bearer ${custosService.identity.accessToken}`
-            },
-            body: JSON.stringify(data),
-        }).then((res) =>
-            res.json().then(res => {
-                refreshNotebooks();
-                launchNotebook(res.id);
-                setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: false});
-                handleCloseLaunchingFromArchive();
-            }).catch(() => {
-                setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: false});
-                handleCloseLaunchingFromArchive();
-            }));
+        try {
+            const res = await fetch('http://localhost:8080/nb/', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json',
+                    'Authorization': `Bearer ${custosService.identity.accessToken}`
+                },
+                body: JSON.stringify(data),
+            });
+            const nb = res.json();
+            refreshNotebooks();
+            launchNotebook(res.id);
+            setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: false});
+            handleCloseLaunchingFromArchive();
+        } catch(e) {
+            setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: false});
+            handleCloseLaunchingFromArchive();
+        }
     }
 
     return (
         <>
-
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Launch Notebook</Modal.Title>
