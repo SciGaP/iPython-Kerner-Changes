@@ -52,6 +52,7 @@ public class NotebookController extends DefaultErrorAttributes {
 
     @PostMapping(path = "/", consumes = "application/json", produces = "application/json")
     public NotebookEntity createNotebook(Authentication authentication, @RequestBody NotebookEntity notebookEntity) {
+        notebookEntity.setOwner(authentication.getName());
         NotebookEntity saved = nbRepo.save(notebookEntity);
         return saved;
     }

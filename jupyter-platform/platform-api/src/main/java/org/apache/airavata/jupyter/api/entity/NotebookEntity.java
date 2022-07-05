@@ -45,6 +45,8 @@ public class NotebookEntity {
     @Column(name = "ARCHIVE_ID")
     private String archiveId;
 
+    @Column(name = "OWNER")
+    private String owner;
 
     public String getId() {
         return id;
@@ -92,5 +94,13 @@ public class NotebookEntity {
 
     public void setArchiveId(String archiveId) {
         this.archiveId = archiveId;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 }

@@ -274,6 +274,7 @@ const MainComponent = () => {
                 <tr>
                     <th>Notebook Id</th>
                     <th>Name</th>
+                    <th>Owner</th>
                     <th>Created Time</th>
                     <th>CPU</th>
                     <th>Memory</th>
@@ -286,6 +287,7 @@ const MainComponent = () => {
                         <tr key={item.id} className='align-items-center'>
                             <td>{item.id}</td>
                             <td>{item.name}</td>
+                            <td>{item.owner}</td>
                             <td>{item.createdTime}</td>
                             <td>{item.cpu}</td>
                             <td>{item.memory}</td>

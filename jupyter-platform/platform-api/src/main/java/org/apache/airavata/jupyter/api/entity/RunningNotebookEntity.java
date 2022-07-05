@@ -51,6 +51,9 @@ public class RunningNotebookEntity {
     @Column(name = "TOKEN")
     private String token;
 
+    @Column(name = "OWNER")
+    private String owner;
+
     public String getId() {
         return id;
     }
@@ -107,6 +110,14 @@ public class RunningNotebookEntity {
         this.active = active;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
     public static final class RunningNotebookEntityBuilder {
         private String notebookId;
         private String containerId;
@@ -114,6 +125,7 @@ public class RunningNotebookEntity {
         private int bindPort;
         private boolean active;
         private String token;
+        private String owner;
 
         private RunningNotebookEntityBuilder() {
         }
@@ -153,6 +165,11 @@ public class RunningNotebookEntity {
             return this;
         }
 
+        public RunningNotebookEntityBuilder withOwner(String owner) {
+            this.owner = owner;
+            return this;
+        }
+
         public RunningNotebookEntity build() {
             RunningNotebookEntity runningNotebookEntity = new RunningNotebookEntity();
             runningNotebookEntity.setNotebookId(notebookId);
@@ -161,6 +178,7 @@ public class RunningNotebookEntity {
             runningNotebookEntity.setBindPort(bindPort);
             runningNotebookEntity.setActive(active);
             runningNotebookEntity.setToken(token);
+            runningNotebookEntity.setOwner(owner);
             return runningNotebookEntity;
         }
     }

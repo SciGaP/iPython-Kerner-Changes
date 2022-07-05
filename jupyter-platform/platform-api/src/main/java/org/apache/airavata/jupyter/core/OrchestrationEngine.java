@@ -89,6 +89,7 @@ public class OrchestrationEngine {
                         .withBindPort(runResp.getSecond())
                         .withContainerId(runResp.getFirst())
                         .withToken(notebookToken)
+                        .withOwner(notebook.getOwner())
                         .withActive(true).build();
                 runningNotebookRepository.save(rne);
 
