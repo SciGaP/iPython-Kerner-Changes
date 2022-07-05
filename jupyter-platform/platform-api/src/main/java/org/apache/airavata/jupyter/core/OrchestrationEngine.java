@@ -45,7 +45,7 @@ public class OrchestrationEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(OrchestrationEngine.class);
 
-    private String baseImage = "dimuthuupe/ipykernel:1.1";
+    private String baseImage = "dimuthuupe/ipykernel:1.2";
     private String containerInputPath = "/opt/ARCHIVE.zip";
     private int containerPort = 8888;
     private String portRange = "33000:35000";
