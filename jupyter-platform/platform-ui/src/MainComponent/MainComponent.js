@@ -31,6 +31,9 @@ const MainComponent = () => {
         }
     }
 
+    const apiHost = "localhost"
+    const apiBase = "http://localhost:8080"
+
     useEffect(() => {
         checkAuthentication();
 
@@ -50,7 +53,7 @@ const MainComponent = () => {
         }
 
         try {
-            const res = await fetch('http://localhost:8080/nb/', {
+            const res = await fetch(apiBase + '/nb/', {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json',
@@ -70,7 +73,7 @@ const MainComponent = () => {
         setNotebookLaunchProcessing({...notebookLaunchProcessing, [recordId]: true});
 
         try {
-            await fetch("http://localhost:8080/nb/launch/" + recordId, {
+            await fetch(apiBase + "/nb/launch/" + recordId, {
                 method: 'GET',
                 headers: {
                     'Content-type': 'application/json',
@@ -83,7 +86,7 @@ const MainComponent = () => {
     }
 
     const openNotebook = (record) => {
-        var newPageUrl = "http://localhost:" + record.bindPort + "/?token=" + record.token;
+        var newPageUrl = "http://" + apiHost + ":" + record.bindPort + "/?token=" + record.token;
         window.open(newPageUrl, "_blank")
     }
 
@@ -92,7 +95,7 @@ const MainComponent = () => {
         setNotebookStopProcessing({...notebookStopProcessing, [record.id]: true});
 
         try {
-            await fetch("http://localhost:8080/nb/kill/" + record.id, {
+            await fetch(apiBase + "/nb/kill/" + record.id, {
                 method: 'GET',
                 headers: {
                     'Content-type': 'application/json',
@@ -108,14 +111,14 @@ const MainComponent = () => {
     const refreshNotebooks = async () => {
         try {
             let res = await Promise.all([
-                fetch("http://localhost:8080/nb/", {
+                fetch(apiBase + "/nb/", {
                     method: 'GET',
                     headers: {
                         'Content-type': 'application/json',
                         'Authorization': `Bearer ${custosService.identity.accessToken}`
                     }
                 }),
-                fetch("http://localhost:8080/nb/launched/", {
+                fetch(apiBase + "/nb/launched/", {
                     method: 'GET',
                     headers: {
                         'Content-type': 'application/json',
@@ -153,7 +156,7 @@ const MainComponent = () => {
 
     const refreshArchives = async () => {
         try {
-            const res = await fetch("http://localhost:8080/archive/", {
+            const res = await fetch(apiBase + "/archive/", {
                 method: 'GET',
                 headers: {
                     'Content-type': 'application/json',
@@ -198,7 +201,7 @@ const MainComponent = () => {
         setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: true});
 
         try {
-            const res = await fetch('http://localhost:8080/nb/', {
+            const res = await fetch(apiBase + '/nb/', {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json',
