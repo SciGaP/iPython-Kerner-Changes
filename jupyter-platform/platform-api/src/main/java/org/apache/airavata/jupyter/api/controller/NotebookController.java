@@ -19,6 +19,7 @@ package org.apache.airavata.jupyter.api.controller;
 
 import org.apache.airavata.jupyter.api.entity.NotebookEntity;
 import org.apache.airavata.jupyter.api.entity.RunningNotebookEntity;
+import org.apache.airavata.jupyter.api.repo.AdminRepository;
 import org.apache.airavata.jupyter.api.repo.NotebookRepository;
 import org.apache.airavata.jupyter.api.repo.RunningNotebookRepository;
 import org.apache.airavata.jupyter.core.OrchestrationEngine;
@@ -50,6 +51,9 @@ public class NotebookController extends DefaultErrorAttributes {
     @Autowired
     private OrchestrationEngine orchestrationEngine;
 
+    @Autowired
+    private AdminRepository adminRepository;
+
     @PostMapping(path = "/", consumes = "application/json", produces = "application/json")
     public NotebookEntity createNotebook(Authentication authentication, @RequestBody NotebookEntity notebookEntity) {
         notebookEntity.setOwner(authentication.getName());
@@ -59,7 +63,12 @@ public class NotebookController extends DefaultErrorAttributes {
 
     @GetMapping(path = "/")
     public List<NotebookEntity> listCreatedNotebooks(Authentication authentication) {
-        Iterable<NotebookEntity> allNotebooks = nbRepo.findAll();
+        Iterable<NotebookEntity> allNotebooks;
+        if (adminRepository.findByUserName(authentication.getName()).isPresent()) {
+            allNotebooks = nbRepo.findAll();
+        } else {
+            allNotebooks = nbRepo.findAllByOwner(authentication.getName());
+        }
         List<NotebookEntity> nbs = new ArrayList<>();
         allNotebooks.forEach(nbs::add);
         return nbs;

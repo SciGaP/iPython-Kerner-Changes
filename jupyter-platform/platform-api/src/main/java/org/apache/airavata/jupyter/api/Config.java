@@ -43,6 +43,9 @@ public class Config implements WebMvcConfigurer {
     @org.springframework.beans.factory.annotation.Value("${custos.client.secret}")
     private String custosClientSecret;
 
+    @org.springframework.beans.factory.annotation.Value("${super.user.mode}")
+    private boolean superUserMode;
+
     @Bean
     OrchestrationEngine orchestrationEngine() {
         return new OrchestrationEngine();
@@ -71,6 +74,11 @@ public class Config implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authenticator).excludePathPatterns("/archive/**");
+
+        if (superUserMode) {
+            registry.addInterceptor(authenticator).excludePathPatterns("/archive/**").excludePathPatterns("/admin/**");
+        } else {
+            registry.addInterceptor(authenticator).excludePathPatterns("/archive/**");
+        }
     }
 }

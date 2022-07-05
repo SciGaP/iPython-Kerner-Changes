@@ -17,11 +17,12 @@
 
 package org.apache.airavata.jupyter.api.repo;
 
-import org.apache.airavata.jupyter.api.entity.NotebookEntity;
+import org.apache.airavata.jupyter.api.entity.AdminEntity;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public interface NotebookRepository extends CrudRepository<NotebookEntity, String> {
-    public Iterable<NotebookEntity> findAllByOwner(String owner);
+import java.util.Optional;
+
+public interface AdminRepository extends CrudRepository<AdminEntity, String> {
+
+    Optional<AdminEntity> findByUserName(String userName);
 }
