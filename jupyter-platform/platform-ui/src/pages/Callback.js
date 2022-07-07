@@ -11,7 +11,7 @@ export default function () {
         const code = searchParams.get("code");
         custosService.identity.getToken({code})
             .then(() => {
-                navigate("/");
+                navigate("/dashboard");
             }).catch(setError);
     }, []);
 

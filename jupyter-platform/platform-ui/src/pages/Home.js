@@ -7,14 +7,6 @@ export default function () {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const code = searchParams.get("code");
-        custosService.identity.getToken({code})
-            .then(() => {
-                navigate("/");
-            }).catch(setError);
-    }, []);
-
     return <div className="w-100 h-100 d-flex flex-row">
         <div className="p-2">
             <h2 id="vision">Click Login to continue</h2>
