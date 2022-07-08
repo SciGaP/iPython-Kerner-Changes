@@ -93,7 +93,7 @@ const MainComponent = () => {
     }
 
     const openNotebook = (record) => {
-        const newPageUrl = `${apiProtocol}://${apiHost}:${record.bindPort}/?token=${record.token}`;
+        const newPageUrl = `http://${apiHost}:${record.bindPort}/?token=${record.token}`;
         window.open(newPageUrl, "_blank")
     }
 
