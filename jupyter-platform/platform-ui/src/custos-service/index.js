@@ -217,6 +217,8 @@ export default class CustosService {
     }
 }
 
+console.log("process ", process);
+console.log("process.env ", process.env);
 console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_CLIENT_ID);
 console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_CLIENT_SEC);
 console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_REDIRECT_URI);
