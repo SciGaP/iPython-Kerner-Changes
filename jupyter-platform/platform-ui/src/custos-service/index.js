@@ -219,14 +219,14 @@ export default class CustosService {
 
 console.log("process ", process);
 console.log("process.env ", process.env);
-console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_CLIENT_ID);
-console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_CLIENT_SEC);
-console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_REDIRECT_URI);
-console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_CUSTOS_API_URL);
+console.log("process.env.REACT_APP_CUSTOS_API_URL ", process.env.REACT_APP_CLIENT_ID);
+console.log("process.env.REACT_APP_CUSTOS_API_URL ", process.env.REACT_APP_CLIENT_SEC);
+console.log("process.env.REACT_APP_CUSTOS_API_URL ", process.env.REACT_APP_REDIRECT_URI);
+console.log("process.env.REACT_APP_CUSTOS_API_URL ", process.env.REACT_APP_CUSTOS_API_URL);
 
 export const custosService = new CustosService({
-    clientId: process.env.VUE_APP_CLIENT_ID,
-    clientSecret: process.env.VUE_APP_CLIENT_SEC,
-    redirectURI: process.env.VUE_APP_REDIRECT_URI,
-    baseURL: process.env.VUE_APP_CUSTOS_API_URL
+    clientId: process.env.REACT_APP_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_CLIENT_SEC,
+    redirectURI: process.env.REACT_APP_REDIRECT_URI,
+    baseURL: process.env.REACT_APP_CUSTOS_API_URL
 });

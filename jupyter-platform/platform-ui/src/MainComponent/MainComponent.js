@@ -32,13 +32,13 @@ const MainComponent = () => {
     }
 
     const {
-        VUE_APP_JUPYTER_PLATFORM_API_PROTOCOL,
-        VUE_APP_JUPYTER_PLATFORM_API_HOST,
-        VUE_APP_JUPYTER_PLATFORM_API_PORT
+        REACT_APP_JUPYTER_PLATFORM_API_PROTOCOL,
+        REACT_APP_JUPYTER_PLATFORM_API_HOST,
+        REACT_APP_JUPYTER_PLATFORM_API_PORT
     } = process.env;
-    const apiProtocol = VUE_APP_JUPYTER_PLATFORM_API_PROTOCOL;
-    const apiHost = VUE_APP_JUPYTER_PLATFORM_API_HOST;
-    const apiPort = VUE_APP_JUPYTER_PLATFORM_API_PORT;
+    const apiProtocol = REACT_APP_JUPYTER_PLATFORM_API_PROTOCOL;
+    const apiHost = REACT_APP_JUPYTER_PLATFORM_API_HOST;
+    const apiPort = REACT_APP_JUPYTER_PLATFORM_API_PORT;
     const apiBase = `${apiProtocol}://${apiHost}:${apiPort}/api`
 
     useEffect(() => {
