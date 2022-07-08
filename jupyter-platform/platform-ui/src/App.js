@@ -17,7 +17,7 @@ function App() {
     const [loginUrl, setLoginUrl] = useState(null);
     const [authenticated, setAuthenticated] = useState(false);
     const [authenticatedUser, setAuthenticatedUser] = useState(null);
-x
+
     const checkAuthentication = () => {
         if (custosService.identity.authenticated()) {
             setAuthenticated(true);
