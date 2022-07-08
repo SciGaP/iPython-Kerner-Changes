@@ -217,6 +217,9 @@ export default class CustosService {
     }
 }
 
+console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_CLIENT_ID);
+console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_CLIENT_SEC);
+console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_REDIRECT_URI);
 console.log("process.env.VUE_APP_CUSTOS_API_URL ", process.env.VUE_APP_CUSTOS_API_URL);
 
 export const custosService = new CustosService({
