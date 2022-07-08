@@ -1,0 +1,101 @@
+- name: Install nginx certbot python3-certbot-nginx
+  yum:
+    name:
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+    state: latest
+  become: yes
+
+- name: Download NodeJS 16.x
+  get_url:
+    url: https://rpm.nodesource.com/setup_16.x
+    dest: /tmp
+    mode: '0755'
+    force: true
+
+- name: Install NodeJS 16.x
+  command: "bash /tmp/setup_16.x"
+  become: yes
+
+
+- name: Install nodejs
+  command: "yum install -y nodejs"
+  become: yes
+
+
+- name: Install yarn
+  command: "npm install yarn -g"
+  become: yes
+
+#- name: Update the default nginx
+#  template:
+#    dest: /etc/nginx/nginx.conf
+#    src: nginx/default.j2
+#    force: yes
+#    mode: 0755
+#  become: yes
+
+#- name: Restart nginx
+#  command: "{{ item }}"
+#  with_items:
+#    - systemctl restart nginx
+#  become: yes
+
+- name: Create Jupyter Platform UI source directory
+  become: yes
+  file: path={{ jupyter_platform_ui_source_dir }}
+    state=directory
+    mode=0755
+    owner={{ user }}
+    group={{ group }}
+
+- name: git checkout from Jupyter Platform UI github repo {{ jupyter_platform_ui_repo }} branch {{ jupyter_platform_ui_git_branch }}
+  git: repo="{{ jupyter_platform_ui_repo }}"
+    dest="{{ jupyter_platform_ui_source_dir }}"
+    version="{{ jupyter_platform_ui_git_branch }}"
+  register: checkout
+  tags: update
+  become: yes
+  become_user: "{{ user }}"
+
+- name: Run Jupyter Platform UI yarn install
+  command: "yarn install chdir={{jupyter_platform_ui_source_dir}}/jupyter-platform/platform-ui"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: Run Jupyter Platform UI yarn build
+  command: "yarn build chdir={{jupyter_platform_ui_source_dir}}/jupyter-platform/platform-ui"
+  environment:
+    VUE_APP_JUPYTER_PLATFORM_API_PROTOCOL: "http"
+    VUE_APP_JUPYTER_PLATFORM_API_HOST: "{{ansible_ssh_host}}"
+    VUE_APP_JUPYTER_PLATFORM_API_PORT: "8080"
+    VUE_APP_CLIENT_ID: "{{ jupyter_platform_ui_client_id }}"
+    VUE_APP_CLIENT_SEC: "{{ jupyter_platform_ui_client_sec }}"
+    VUE_APP_REDIRECT_URI: "{{ jupyter_platform_ui_client_redirect_uri }}"
+    VUE_APP_CUSTOS_API_URL: "{{ jupyter_platform_ui_custos_api_url }}"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: Copy build files
+  command: "sudo cp -a ./build/. /usr/share/nginx/html chdir={{jupyter_platform_ui_source_dir}}/jupyter-platform/platform-ui"
+  become: yes
+  become_user: "{{ user }}"
+#- copy:
+#    src: "{{ item }}"
+#    dest: /usr/share/nginx/html
+#    mode: 600
+#  with_fileglob:
+#    - "{{jupyter_platform_ui_source_dir}}/jupyter-platform/platform-ui/build/*"
+#  become: yes
+#  become_user: "{{ user }}"
+
+- name: open firewall port 80 for HTTP connections
+  firewalld: port="80/tcp"
+    zone=public permanent=true state=enabled immediate=yes
+  become: yes
+
+- name: open firewall port 443 for HTTPS connections
+  firewalld: port="443/tcp"
+    zone=public permanent=true state=enabled immediate=yes
+  become: yes

@@ -1,0 +1,52 @@
+#
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+---
+ansible_connection: ssh
+
+user: rocky
+group: rocky
+user_home: "/home/{{ user }}"
+
+custos_host: prod.custos.usecustos.org
+custos_port: 443
+
+jupyter_platform_ui_source_dir: /home/rocky/iPython-Kerner-Changes
+jupyter_platform_ui_repo: https://github.com/SciGaP/iPython-Kerner-Changes.git
+jupyter_platform_ui_git_branch: main
+jupyter_platform_ui_host: "149.165.154.162"
+jupyter_platform_ui_client_id: "{{ vault_jupyter_platform_ui_client_id }}"
+jupyter_platform_ui_client_sec: "{{ vault_jupyter_platform_ui_client_sec }}"
+jupyter_platform_ui_client_redirect_uri: "https://{{ jupyter_platform_ui_host }}/callback"
+jupyter_platform_ui_custos_api_url: "https://{{ custos_host }}/apiserver/"
+
+sharing_subnets:
+  - "149.163.0.0/16"
+  - "140.182.0.0/16"
+  - "149.165.0.0/16"
+  - "192.68.133.0/24"
+  - "192.12.206.0/24"
+  - "149.159.0.0/16"
+  - "156.56.0.0/16"
+  - "149.161.0.0/16"
+  - "149.160.0.0/16"
+  - "149.166.0.0/16"
+  - "134.68.0.0/16"
+  - "129.79.0.0/16"
