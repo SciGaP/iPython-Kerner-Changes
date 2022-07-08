@@ -218,8 +218,8 @@ export default class CustosService {
 }
 
 export const custosService = new CustosService({
-    clientId: "custos-dkcx0gskg3ivaqbftcnm-10000401",
-    clientSecret: "NHYVqQ9695ygkwspCfh9yhboSeD7vu7YejguK76V",
-    redirectURI: "http://localhost:3000/callback",
-    baseURL: "https://prod.custos.usecustos.org/apiserver"
+    clientId: process.env.VUE_APP_CLIENT_ID,
+    clientSecret: process.env.VUE_APP_CLIENT_SEC,
+    redirectURI: process.env.VUE_APP_REDIRECT_URI,
+    baseURL: process.env.VUE_APP_CUSTOS_API_URL
 });

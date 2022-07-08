@@ -31,8 +31,15 @@ const MainComponent = () => {
         }
     }
 
-    const apiHost = "localhost"
-    const apiBase = "http://localhost:8080"
+    const {
+        VUE_APP_JUPYTER_PLATFORM_API_PROTOCOL,
+        VUE_APP_JUPYTER_PLATFORM_API_HOST,
+        VUE_APP_JUPYTER_PLATFORM_API_PORT
+    } = process.env;
+    const apiProtocol = VUE_APP_JUPYTER_PLATFORM_API_PROTOCOL;
+    const apiHost = VUE_APP_JUPYTER_PLATFORM_API_HOST;
+    const apiPort = VUE_APP_JUPYTER_PLATFORM_API_PORT;
+    const apiBase = `${apiProtocol}://${apiHost}:${apiPort}/api`
 
     useEffect(() => {
         checkAuthentication();
@@ -86,7 +93,7 @@ const MainComponent = () => {
     }
 
     const openNotebook = (record) => {
-        var newPageUrl = "http://" + apiHost + ":" + record.bindPort + "/?token=" + record.token;
+        const newPageUrl = `${apiProtocol}://${apiHost}:${record.bindPort}/?token=${record.token}`;
         window.open(newPageUrl, "_blank")
     }
 
@@ -214,7 +221,7 @@ const MainComponent = () => {
             launchNotebook(nb.id);
             setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: false});
             handleCloseLaunchingFromArchive();
-        } catch(e) {
+        } catch (e) {
             setArchiveLaunchProcessing({...archiveLaunchProcessing, [archive.id]: false});
             handleCloseLaunchingFromArchive();
         }
