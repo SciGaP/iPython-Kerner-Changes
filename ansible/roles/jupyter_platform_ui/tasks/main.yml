@@ -67,9 +67,9 @@
 - name: Run Jupyter Platform UI yarn build
   command: "yarn build chdir={{jupyter_platform_ui_source_dir}}/jupyter-platform/platform-ui"
   environment:
-    REACT_APP_JUPYTER_PLATFORM_API_PROTOCOL: "http"
-    REACT_APP_JUPYTER_PLATFORM_API_HOST: "{{ansible_ssh_host}}"
-    REACT_APP_JUPYTER_PLATFORM_API_PORT: "8080"
+    REACT_APP_JUPYTER_PLATFORM_API_PROTOCOL: "{{jupyter_platform_api_protocol}}"
+    REACT_APP_JUPYTER_PLATFORM_API_HOST: "{{jupyter_platform_api_host}}"
+    REACT_APP_JUPYTER_PLATFORM_API_PORT: "{{jupyter_platform_api_port}}"
     REACT_APP_CLIENT_ID: "{{ jupyter_platform_ui_client_id }}"
     REACT_APP_CLIENT_SEC: "{{ jupyter_platform_ui_client_sec }}"
     REACT_APP_REDIRECT_URI: "{{ jupyter_platform_ui_client_redirect_uri }}"

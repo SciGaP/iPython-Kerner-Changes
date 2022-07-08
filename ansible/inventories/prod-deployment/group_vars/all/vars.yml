@@ -28,13 +28,20 @@ user_home: "/home/{{ user }}"
 custos_host: prod.custos.usecustos.org
 custos_port: 443
 
+
+jupyter_platform_api_protocol: "http"
+jupyter_platform_api_host: "{{ ansible_ssh_host }}"
+jupyter_platform_api_port: "80"
+
 jupyter_platform_ui_source_dir: /home/rocky/iPython-Kerner-Changes
 jupyter_platform_ui_repo: https://github.com/SciGaP/iPython-Kerner-Changes.git
 jupyter_platform_ui_git_branch: main
-jupyter_platform_ui_host: "149.165.154.162"
+jupyter_platform_ui_protocol: "http"
+jupyter_platform_ui_host: "{{ ansible_ssh_host }}"
+jupyter_platform_ui_port: "80"
 jupyter_platform_ui_client_id: "{{ vault_jupyter_platform_ui_client_id }}"
 jupyter_platform_ui_client_sec: "{{ vault_jupyter_platform_ui_client_sec }}"
-jupyter_platform_ui_client_redirect_uri: "https://{{ jupyter_platform_ui_host }}/callback"
+jupyter_platform_ui_client_redirect_uri: "{{ jupyter_platform_ui_protocol }}://{{ jupyter_platform_ui_host }}:{{ jupyter_platform_ui_port }}/callback"
 jupyter_platform_ui_custos_api_url: "https://{{ custos_host }}/apiserver/"
 
 sharing_subnets:
