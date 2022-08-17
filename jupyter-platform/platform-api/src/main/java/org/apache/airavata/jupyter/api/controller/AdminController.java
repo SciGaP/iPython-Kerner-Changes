@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(path = "/admin")
+@RequestMapping(path = "/api/admin")
 public class AdminController {
 
     @Autowired

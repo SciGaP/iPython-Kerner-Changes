@@ -76,9 +76,9 @@ public class Config implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
 
         if (superUserMode) {
-            registry.addInterceptor(authenticator).excludePathPatterns("/archive/**").excludePathPatterns("/admin/**");
+            registry.addInterceptor(authenticator).excludePathPatterns("/api/archive/**").excludePathPatterns("/api/admin/**");
         } else {
-            registry.addInterceptor(authenticator).excludePathPatterns("/archive/**");
+            registry.addInterceptor(authenticator).excludePathPatterns("/api/archive/**");
         }
     }
 }

@@ -32,7 +32,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @RestController
-@RequestMapping(path = "/archive")
+@RequestMapping(path = "/api/archive")
 public class ArchiveController {
     private static final Logger logger = LoggerFactory.getLogger(ArchiveController.class);
 

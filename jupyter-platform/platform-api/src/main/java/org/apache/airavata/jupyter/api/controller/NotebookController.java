@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(path = "/nb")
+@RequestMapping(path = "/api/nb")
 public class NotebookController extends DefaultErrorAttributes {
 
     private static final Logger logger = LoggerFactory.getLogger(NotebookController.class);
