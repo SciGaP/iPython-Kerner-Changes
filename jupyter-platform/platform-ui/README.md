@@ -6,7 +6,7 @@ This is an application which contains a connected flask backend to a react front
 1. Install nodejs (v14.20.0 is recommended)
 2. `npm install -g yarn` 
 3. `yarn install`
-4. `yarn serve`
+4. `yarn start`
 
 Next, run `npm start` to start the frontend section of the application.
 
