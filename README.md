@@ -1,5 +1,10 @@
 # iPython-Kerner-Changes
 
+<!---
+1. Include Java Version
+2. Instructions to set it up
+-->
+
 ### Docker Instructions (Recommended)
 
 1. `docker build -t dimuthuupe/ipykernel:1.0 .`
