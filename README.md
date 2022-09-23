@@ -34,3 +34,6 @@
 ##### Start Tracing Server
 
 1. `sudo python3 tools/tracing-server/strace_server.py`
+
+#### Known Issues
+- [Issue with Mac M1](https://github.com/SciGaP/iPython-Kerner-Changes/issues/8#issue-1383841536)

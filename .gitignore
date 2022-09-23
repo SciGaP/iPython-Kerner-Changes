@@ -1,3 +1,6 @@
 .idea
 ENV
 ExampleNotebooks/.ipynb_checkpoints
+
+# Mac files
+.DS_Store
