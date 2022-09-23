@@ -19,17 +19,30 @@ package org.apache.airavata.jupyter.api.controller;
 
 import org.apache.airavata.jupyter.api.entity.ArchiveEntity;
 import org.apache.airavata.jupyter.api.entity.NotebookEntity;
+import org.apache.airavata.jupyter.api.entity.job.JobEntity;
 import org.apache.airavata.jupyter.api.repo.ArchiveRepository;
+import org.apache.airavata.jupyter.api.repo.JobRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping(path = "/api/archive")
@@ -40,6 +53,9 @@ public class ArchiveController {
 
     @Autowired
     private ArchiveRepository archiveRepository;
+
+    @Autowired
+    private JobRepository jobRepository;
 
     @PostMapping(path = "/", consumes = "application/json", produces = "application/json")
     public ArchiveEntity createArchive(@RequestBody ArchiveEntity archiveEntity) {
@@ -69,5 +85,44 @@ public class ArchiveController {
         Files.write(path, bytes);
 
         return Collections.singletonMap("path", path.toAbsolutePath().toString());
+    }
+
+    @GetMapping (value = "/download/{jobId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<StreamingResponseBody> download(@PathVariable String jobId, final HttpServletResponse response)
+            throws Exception {
+        response.setContentType("application/zip");
+        response.setHeader(
+                "Content-Disposition",
+                "attachment;filename=REMOTE_STATE.zip");
+
+        StreamingResponseBody stream = out -> {
+
+
+            Optional<JobEntity> jobOp = jobRepository.findById(jobId);
+            JobEntity job = jobOp.get();
+            final File directory = new File(job.getLocalWorkingPath());
+            final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
+
+            if(directory.exists() && directory.isDirectory()) {
+                try {
+                    for (final File file : directory.listFiles()) {
+                        final InputStream inputStream=new FileInputStream(file);
+                        final ZipEntry zipEntry = new ZipEntry(file.getName());
+                        zipOut.putNextEntry(zipEntry);
+                        byte[] bytes=new byte[1024];
+                        int length;
+                        while ((length=inputStream.read(bytes)) >= 0) {
+                            zipOut.write(bytes, 0, length);
+                        }
+                        inputStream.close();
+                    }
+                    zipOut.close();
+                } catch (final IOException e) {
+                    logger.error("Exception while reading and streaming data {} ", e);
+                }
+            }
+        };
+        logger.info("steaming response {} ", stream);
+        return new ResponseEntity(stream, HttpStatus.OK);
     }
 }
