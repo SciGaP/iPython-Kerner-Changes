@@ -24,7 +24,7 @@
 
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d [%t] %-5p %c{30} %X - %m%n"/>
+            <PatternLayout pattern="%d [%t] %-5p %c{30} - %m%n"/>
         </Console>
         <RollingFile name="RollingFileAppender" fileName="../logs/airavata.log"
                      filePattern="logs/${date:yyyy-MM}/airavata-log-%d{MM-dd-yyyy}-%i.log.gz">
