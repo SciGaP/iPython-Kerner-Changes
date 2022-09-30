@@ -5,6 +5,13 @@
 2. Instructions to set it up
 -->
 
+1. [Introduction](#introduction)
+2. [Dev Set Up](#dev-set-up)
+3. [Features](#features)
+
+## 1. Introduction<a name="introduction"/>
+
+
 ### Docker Instructions (Recommended)
 
 1. `docker build -t dimuthuupe/ipykernel:1.0 .`
