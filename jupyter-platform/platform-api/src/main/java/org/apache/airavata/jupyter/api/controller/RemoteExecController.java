@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -118,6 +120,13 @@ public class RemoteExecController {
     public ComputeEntity createCompute(Authentication authentication, @RequestBody ComputeEntity computeEntity) {
         ComputeEntity saved = computeRepository.save(computeEntity);
         return saved;
+    }
+
+    @GetMapping(path = "/compute")
+    public List<ComputeEntity> listComputes(Authentication authentication, @RequestBody ComputeEntity computeEntity) {
+        List<ComputeEntity> computeEntities = new ArrayList<>();
+        computeRepository.findAll().forEach(computeEntities::add);
+        return computeEntities;
     }
 
     private JobSubmitter resolveJobSubmitter(InterfacingProtocol interfacingProtocol,

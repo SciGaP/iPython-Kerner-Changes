@@ -29,12 +29,19 @@ import os.path
 from os.path import exists
 import socket
 import uuid
+import subprocess
 
 def load_ipython_extension(ipython):
     ipython.register_magics(StateCaptureMagic)
 
 @magics_class
 class StateCaptureMagic(Magics):
+
+    @line_magic
+    @needs_local_scope
+    def print_local_context(self, line, cell="", local_ns=None):
+        print(local_ns.keys())
+
 
     @line_magic
     @needs_local_scope
@@ -46,11 +53,20 @@ class StateCaptureMagic(Magics):
     def load_context_from_file(self, context_file, local_ns):
         if exists(context_file):
 
+            print("local context before")
+            print(local_ns.keys())
+
             with open(context_file, "rb") as input_file:
                 final_scope  = pickle.load(input_file)
 
+                print("remote context")
+                print(final_scope.keys())
+
             for var in final_scope:
                 local_ns[var] = final_scope[var]
+
+            print("local context after")
+            print(local_ns.keys())
 
             print("Successfully loaded run time context from " + context_file)
         else:
@@ -98,8 +114,17 @@ class StateCaptureMagic(Magics):
         uploadServer = None
         archiveName = "HPC Export"
         compute_id = None
-        ignoredDeps = set()
-        
+        ignoredDeps = {"ipykernel", "ipython", "ipython-genutils", "ipywidgets",
+                       "jupyter-client", "jupyter-core", "jupyterlab-pygments", "jupyterlab-widgets", "nbclient",
+                       "nbconvert", "nbformat", "notebook", "state-capture-magic", "pip", "pycparser", "Pygments",
+                       "pyparsing", "pyrsistent", "python-dateutil", "setuptools", "six", "soupsieve", "stack-data",
+                       "terminado", "terminado", "dill", "debugpy", "executing","idna", "fastjsonschema", "jsonschema",
+                       "MarkupSafe", "argon2-cffi", "typing-extensions", "urllib3", "wcwidth", "webencodings", "wheel",
+                       "widgetsnbextension", "zipp", "beautifulsoup4", "bleach", "certifi", "cffi", "charset-normalizer",
+                       "argon2-cffi-bindings", "asttokens", "attrs", "backcall", "contourpy", "cycler", "decorator", "defusedxml",
+                       "entrypoints", "fonttools", "importlib-resources", "jedi", "Jinja2", "kiwisolver", "mistune", "nest-asyncio",
+                       "packaging", "pandocfilters", "parso", "pexpect", "pickleshare", "Pillow", "prometheus-client", "prompt-toolkit",
+                       "psutil", "ptyprocess", "pure-eval", "pyzmq", "requests", "Send2Trash", "tinycss2", "tornado", "traitlets"}
 
         for param in parameters:
             param = param.strip()
@@ -116,7 +141,7 @@ class StateCaptureMagic(Magics):
                 for dep in depsList:
                     ignoredDeps.add(dep)
 
-        accessed_files = self.get_accessed_files()
+        accessed_files = self.get_accessed_files(ignoreAbsPaths=True)
         dependencies = self.get_dependencies(local_ns, ignoredDeps)
         archive_dir = "ARCHIVE"
 
@@ -221,6 +246,18 @@ class StateCaptureMagic(Magics):
         captureLocalContext = True
         archiveName = ""
 
+        ignoredDeps = {"ipykernel", "ipython", "ipython-genutils", "ipywidgets",
+                       "jupyter-client", "jupyter-core", "jupyterlab-pygments", "jupyterlab-widgets", "nbclient",
+                       "nbconvert", "nbformat", "notebook", "state-capture-magic", "pip", "pycparser", "Pygments",
+                       "pyparsing", "pyrsistent", "python-dateutil", "setuptools", "six", "soupsieve", "stack-data",
+                       "terminado", "terminado", "dill", "debugpy", "executing","idna", "fastjsonschema", "jsonschema",
+                       "MarkupSafe", "argon2-cffi", "typing-extensions", "urllib3", "wcwidth", "webencodings", "wheel",
+                       "widgetsnbextension", "zipp", "beautifulsoup4", "bleach", "certifi", "cffi", "charset-normalizer",
+                       "argon2-cffi-bindings", "asttokens", "attrs", "backcall", "contourpy", "cycler", "defusedxml",
+                       "entrypoints", "fonttools", "importlib-resources", "jedi", "Jinja2", "kiwisolver", "mistune", "nest-asyncio",
+                       "packaging", "pandocfilters", "parso", "pexpect", "pickleshare", "Pillow", "prometheus-client", "prompt-toolkit",
+                       "psutil", "ptyprocess", "pure-eval", "pyzmq", "requests", "Send2Trash", "tinycss2", "tornado", "traitlets"}
+
         for param in parameters:
             param = param.strip()
             if param.startswith("createArchive"):
@@ -243,7 +280,7 @@ class StateCaptureMagic(Magics):
 
         accessed_files = self.get_accessed_files()
         accessed_files.add(notebook_name)
-        dependencies = self.get_dependencies(local_ns)
+        dependencies = self.get_dependencies(local_ns, ignoredDeps)
 
         if createArchive:
             archive_dir = "ARCHIVE"
@@ -278,6 +315,8 @@ class StateCaptureMagic(Magics):
 
             if captureLocalContext:
                 var_context = self.get_local_context(local_ns)
+                print("local context")
+                print(var_context.keys())
 
                 pickle.dump( var_context, open( archive_dir + "/context.p", "wb" ))
 
@@ -350,7 +389,7 @@ class StateCaptureMagic(Magics):
                     relative_path = nn['notebook']['path']
                     return os.path.join(ss['notebook_dir'], relative_path)
 
-    def get_accessed_files(self):
+    def get_accessed_files(self, ignoreAbsPaths=False):
 
         pid = os.getpid()
         log_file = "/tmp/p" + str(pid)
@@ -360,8 +399,8 @@ class StateCaptureMagic(Magics):
 
         ignore_list = ['/usr', '/lib','/home/dimuthu/.ipython/', "/dev", ".so", "/proc",
                        "/etc", "/tmp/pip-", "/home/dimuthu/.cache", "/root/.cache",
-                       "ARCHIVE", "/root/.local", "dependencies.json", "context.p", "/root/.keras",
-                       "files.json", "metadata.json"]
+                       "ARCHIVE", "/root/.local", "dependencies.json", "context.p", "/root/.keras", '/var',
+                       "files.json", "metadata.json", '/root/.fonts']
 
         for path in sys.path[1:]:
             if path:
@@ -385,36 +424,42 @@ class StateCaptureMagic(Magics):
                     if path.count(ignore):
                         should_ignore = True
                         break
+
+                if path.startswith('/opt/Notebooks'):
+                    path = path.replace('/opt/Notebooks', '.', 1)
+
+                if ignoreAbsPaths:
+                    if path.startswith('/'):
+                        should_ignore = True
                 if not should_ignore:
                     accessed_files.add(path)
 
         if log_file in accessed_files:
             accessed_files.remove(log_file)
 
+        prev_files_f = "/opt/ARCHIVE/files.json"
+        if exists(prev_files_f):
+            f = open(prev_files_f)
+            prev_files_json = json.load(f)
+            prev_files = set(prev_files_json.values())
+            prev_files.remove(self.get_notebook_name())
+            accessed_files = set.union(prev_files, accessed_files)
+
         return accessed_files
 
     def get_dependencies(self, local_ns, ignoredDeps = set()):
-        def imports():
-            for name, val in local_ns.items():
-                if isinstance(val, types.ModuleType):
-                    yield val.__name__
-
-        import_list = list(imports())
+        raw_deps = subprocess.check_output(['pip', 'list']).decode("utf-8").split('\n')[2:]
         dependencies = {}
-        for imp in import_list:
-            try:
-                if imp.count(".") > 0:
-                    imp = imp.split(".")[0]
-                if not imp in ignoredDeps:
-                    dependencies[imp] = version(imp)
-            except PackageNotFoundError:
-                pass
+        for i in range(len(raw_deps)):
+            parts = raw_deps[i].strip().split(' ')
+            if len(parts) > 1 and not parts[0] in ignoredDeps:
+                dependencies[parts[0]] = parts[-1]
         return dependencies
 
     def get_local_context(self, local_ns):
         var_context = {}
         local_variables = self.get_magic_out("who")[:-1]
-        for var_name in local_variables:
+        for var_name in local_ns:
             var_context[var_name] = local_ns[var_name]
             try:
                 pickle.dumps(var_context)

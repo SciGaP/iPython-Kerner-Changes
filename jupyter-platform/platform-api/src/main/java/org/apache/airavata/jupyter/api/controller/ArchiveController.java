@@ -18,7 +18,6 @@
 package org.apache.airavata.jupyter.api.controller;
 
 import org.apache.airavata.jupyter.api.entity.ArchiveEntity;
-import org.apache.airavata.jupyter.api.entity.NotebookEntity;
 import org.apache.airavata.jupyter.api.entity.job.JobEntity;
 import org.apache.airavata.jupyter.api.repo.ArchiveRepository;
 import org.apache.airavata.jupyter.api.repo.JobRepository;
@@ -32,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,6 +49,7 @@ import java.util.zip.ZipOutputStream;
 public class ArchiveController {
     private static final Logger logger = LoggerFactory.getLogger(ArchiveController.class);
 
+    @org.springframework.beans.factory.annotation.Value("${archive.upload.dir}")
     private String uploadPath = "/tmp/";
 
     @Autowired
@@ -87,6 +88,32 @@ public class ArchiveController {
         return Collections.singletonMap("path", path.toAbsolutePath().toString());
     }
 
+    @GetMapping (value = "/download_archive/{archiveId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<StreamingResponseBody> downloadArchive(@PathVariable String archiveId,
+                                                                 final HttpServletResponse response) throws Exception {
+        response.setContentType("application/zip");
+        response.setHeader(
+                "Content-Disposition",
+                "attachment;filename=ARCHIVE.zip");
+
+        ArchiveEntity archive = getArchive(archiveId);
+        StreamingResponseBody stream = out -> {
+
+            ServletOutputStream os = response.getOutputStream();
+            try(FileInputStream is = new FileInputStream(archive.getPath())) {
+                byte[] bytes=new byte[1024];
+                int length;
+                while ((length=is.read(bytes)) >= 0) {
+                    os.write(bytes, 0, length);
+                }
+
+                os.close();
+            }
+        };
+
+        return new ResponseEntity(stream, HttpStatus.OK);
+    }
+
     @GetMapping (value = "/download/{jobId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<StreamingResponseBody> download(@PathVariable String jobId, final HttpServletResponse response)
             throws Exception {
@@ -95,7 +122,7 @@ public class ArchiveController {
                 "Content-Disposition",
                 "attachment;filename=REMOTE_STATE.zip");
 
-        StreamingResponseBody stream = out -> {
+        StreamingResponseBody stream = out2 -> {
 
 
             Optional<JobEntity> jobOp = jobRepository.findById(jobId);

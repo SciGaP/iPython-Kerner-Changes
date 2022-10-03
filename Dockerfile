@@ -16,9 +16,13 @@ RUN pip install notebook
 RUN pip install requests
 RUN pip install torch
 RUN pip install torchvision
+RUN pip install ipywidgets
 
 RUN apt install -y wget
 RUN apt install -y unzip
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt update && apt-get install -y --no-install-recommends  --fix-missing ffmpeg libsm6 libxext6
 
 RUN cd /opt/ipykernel; pip install .
 
