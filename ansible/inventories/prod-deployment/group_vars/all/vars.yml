@@ -21,8 +21,8 @@
 ---
 ansible_connection: ssh
 
-user: rocky
-group: rocky
+user: exouser
+group: exouser
 user_home: "/home/{{ user }}"
 
 custos_host: prod.custos.usecustos.org
@@ -33,7 +33,7 @@ jupyter_platform_api_protocol: "https"
 jupyter_platform_api_host: "{{ ansible_ssh_host }}"
 jupyter_platform_api_port: "443"
 
-jupyter_platform_ui_source_dir: /home/rocky/iPython-Kerner-Changes
+jupyter_platform_ui_source_dir: /home/exouser/iPython-Kerner-Changes
 jupyter_platform_ui_repo: https://github.com/SciGaP/iPython-Kerner-Changes.git
 jupyter_platform_ui_git_branch: main
 jupyter_platform_ui_protocol: "https"
