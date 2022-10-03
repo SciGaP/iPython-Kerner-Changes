@@ -52,6 +52,26 @@
   become: yes
   when: ansible_os_family == "RedHat"
 
+#- name: Update and upgrade apt packages
+#  apt:
+#    upgrade: yes
+#    update_cache: yes
+#  become: yes
+
+- name: Install dnf (Debian)
+  apt:
+    name:
+      - dnf
+    state: latest
+    update_cache: yes
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install dnf (RedHat)
+  yum: name=firewalld state=latest update_cache=yes
+  become: dnf
+  when: ansible_os_family == "RedHat"
+
 - name: Install Firewalld (Debian)
   apt: name=firewalld state=latest update_cache=yes
   become: yes

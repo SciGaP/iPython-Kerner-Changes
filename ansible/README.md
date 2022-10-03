@@ -24,3 +24,4 @@ Now you should be ready to run `ansible-playbook` and other ansible commands.
 ## Useful commands
 
 - Deploy Data Lake: `ansible-playbook -i inventories/{inventory}/ --vault-password-file=vault-password.txt datalake.yml`
+- Enable https: Run this manually in the server `sudo certbot --nginx -d <host> -d <host>` 

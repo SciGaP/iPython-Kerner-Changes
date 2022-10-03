@@ -1,4 +1,14 @@
-- name: Install nginx certbot python3-certbot-nginx
+- name: Install nginx certbot python3-certbot-nginx (Debian)
+  apt:
+    name:
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+    state: latest
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install nginx certbot python3-certbot-nginx (RedHat)
   yum:
     name:
       - nginx
@@ -6,41 +16,50 @@
       - python3-certbot-nginx
     state: latest
   become: yes
+  when: ansible_os_family == "RedHat"
 
-- name: Download NodeJS 16.x
+- name: Download NodeJS 16.x (Debian)
+  get_url:
+    url: https://deb.nodesource.com/setup_16.x
+    dest: /tmp
+    mode: '0755'
+    force: true
+  when: ansible_os_family == "Debian"
+
+- name: Download NodeJS 16.x (RedHat)
   get_url:
     url: https://rpm.nodesource.com/setup_16.x
     dest: /tmp
     mode: '0755'
     force: true
+  when: ansible_os_family == "RedHat"
 
 - name: Install NodeJS 16.x
   command: "bash /tmp/setup_16.x"
   become: yes
 
+- name: Install nodejs (Debian)
+  command: "apt-get install -y nodejs"
+  become: yes
+  when: ansible_os_family == "Debian"
 
-- name: Install nodejs
+- name: Install nodejs (RedHat)
   command: "yum install -y nodejs"
   become: yes
+  when: ansible_os_family == "RedHat"
 
 
 - name: Install yarn
   command: "npm install yarn -g"
   become: yes
 
-#- name: Update the default nginx
-#  template:
-#    dest: /etc/nginx/nginx.conf
-#    src: nginx/default.j2
-#    force: yes
-#    mode: 0755
-#  become: yes
-
-#- name: Restart nginx
-#  command: "{{ item }}"
-#  with_items:
-#    - systemctl restart nginx
-#  become: yes
+- name: Update the default nginx
+  template:
+    dest: /etc/nginx/sites-enabled/default
+    src: nginx/default.j2
+    force: yes
+    mode: 0755
+  become: yes
 
 - name: Create Jupyter Platform UI source directory
   become: yes
@@ -78,17 +97,9 @@
   become_user: "{{ user }}"
 
 - name: Copy build files
-  command: "sudo cp -a ./build/. /usr/share/nginx/html chdir={{jupyter_platform_ui_source_dir}}/jupyter-platform/platform-ui"
+  command: "sudo cp -a ./build/. /var/www/html chdir={{jupyter_platform_ui_source_dir}}/jupyter-platform/platform-ui"
   become: yes
   become_user: "{{ user }}"
-#- copy:
-#    src: "{{ item }}"
-#    dest: /usr/share/nginx/html
-#    mode: 600
-#  with_fileglob:
-#    - "{{jupyter_platform_ui_source_dir}}/jupyter-platform/platform-ui/build/*"
-#  become: yes
-#  become_user: "{{ user }}"
 
 - name: open firewall port 80 for HTTP connections
   firewalld: port="80/tcp"

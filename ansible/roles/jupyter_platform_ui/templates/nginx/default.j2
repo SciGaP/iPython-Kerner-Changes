@@ -1,0 +1,28 @@
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+	root /var/www/html;
+	index index.html;
+
+	server_name _;
+
+	location /api/ {
+        proxy_pass  http://127.0.0.1:8080;
+    }
+
+    index index.html;
+
+    location ~ ^/(css|js)/ {
+        # These assets include a digest in the filename, so they will never change
+        expires 5m;
+    }
+    location ~* ^.+\.(html|htm)$ {
+        # Very short caching time to ensure changes are immediately recognized
+        expires 5m;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
