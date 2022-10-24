@@ -30,17 +30,27 @@ import org.apache.airavata.jupyter.api.entity.ui.UIAppEntity;
 import org.apache.airavata.jupyter.api.entity.ui.UIExecutionEntity;
 import org.apache.airavata.jupyter.api.entity.ui.UIExecutionResponseEntity;
 import org.apache.airavata.jupyter.api.repo.*;
+import org.apache.commons.io.Charsets;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -75,8 +85,6 @@ public class OrchestrationEngine {
     private String dockerHostIp;
 
     private final ExecutorService launchQueue = Executors.newFixedThreadPool(20);
-
-    private final Map<String, Process> noVncProcesses = new ConcurrentHashMap<>();
 
     @Autowired
     private NotebookRepository notebookRepository;
@@ -143,19 +151,44 @@ public class OrchestrationEngine {
 
         UIAppEntity uiAppEntity = appEtyOp.orElseThrow(() -> new Exception("No UI App " + savedExecutionEty.getAppName()));
 
-        Pair<String, Integer> runResponse = runUIContainer(savedExecutionEty, uiAppEntity);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost("http://localhost:8081/ui/launch");
 
-        String noVncUrl = startNoVNC(runResponse.getFirst(), runResponse.getSecond(), uiAppEntity);
+        String json = "{\n" +
+                "    \"executionId\": \"" + savedExecutionEty.getId()+ "\",\n" +
+                "    \"dockerImageName\": \"" + uiAppEntity.getName() + "\",\n" +
+                "    \"internalVncPort\": " + uiAppEntity.getInternalVncPort() + ",\n" +
+                "    \"vncPassword\": \"" + uiAppEntity.getVncPassword() + "\"\n" +
+                "}";
 
-        UIExecutionResponseEntity responseEntity = new UIExecutionResponseEntity();
-        responseEntity.setId(UUID.randomUUID().toString());
-        responseEntity.setExecutionState(UIExecutionResponseEntity.ExecutionState.OK);
-        responseEntity.setMessage("Successfully started container " + runResponse.getFirst());
-        responseEntity.setContainerId(runResponse.getFirst());
-        responseEntity.setVncUrl(noVncUrl);
-        responseEntity.setExecutionId(savedExecutionEty.getId());
+        StringEntity entity = new StringEntity(json);
+        httpPost.setEntity(entity);
+        httpPost.setHeader("Accept", "application/json");
+        httpPost.setHeader("Content-type", "application/json");
 
-        return responseEntity;
+        CloseableHttpResponse response = client.execute(httpPost);
+        int statusCode = response.getStatusLine().getStatusCode();
+
+        if (statusCode == 200) {
+            HttpEntity httpResponseEntity = response.getEntity();
+            Header encodingHeader = httpResponseEntity.getContentEncoding();
+
+            String jsonOut = EntityUtils.toString(httpResponseEntity, StandardCharsets.UTF_8);
+
+            JSONObject jsonObject = new JSONObject(jsonOut);
+
+            UIExecutionResponseEntity responseEntity = new UIExecutionResponseEntity();
+            responseEntity.setId(UUID.randomUUID().toString());
+            responseEntity.setExecutionState(UIExecutionResponseEntity.ExecutionState.OK);
+            responseEntity.setMessage("Successfully started container " + jsonObject.getString("containerId"));
+            responseEntity.setContainerId(jsonObject.getString("containerId"));
+            responseEntity.setVncUrl(jsonObject.getString("vncUrl"));
+            responseEntity.setExecutionId(savedExecutionEty.getId());
+
+            return responseEntity;
+        } else {
+            throw new Exception("Failed to submit launch UI request. Error code " + statusCode);
+        }
     }
 
     public void killNotebook(NotebookEntity notebook) {
@@ -307,32 +340,17 @@ public class OrchestrationEngine {
         }
     }
 
+    public void killNoVncSession(String containerId) throws Exception {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet("http://localhost:8081/ui/killNoVnc/" + containerId);
 
-    private String startNoVNC(String containerId, int containerPort, UIAppEntity uiAppEntity) throws Exception {
-        int noVNCPort = getAvailablePort(portRange, containerPort);
+        httpGet.setHeader("Accept", "application/json");
 
-        Process noVncProcess = Runtime.getRuntime().exec("sh " + vncBin + " --vnc localhost:" +
-                containerPort + " --listen " + noVNCPort, null, new File(vncHomeDir));
+        CloseableHttpResponse response = client.execute(httpGet);
+        int statusCode = response.getStatusLine().getStatusCode();
 
-        VncProcessReader processReader =
-                new VncProcessReader(noVncProcess.getInputStream(), System.out::println);
-        Future<?> future = Executors.newSingleThreadExecutor().submit(processReader);
-
-        noVncProcesses.put(containerId, noVncProcess);
-
-        String noVNCUrl = "http://" + vncBindHost + ":" + noVNCPort + "/vnc.html?host="
-                + vncBindHost+ "&port=" + noVNCPort + "&autoconnect=1&password=" + uiAppEntity.getVncPassword();
-
-        logger.info("Using No VNC URL {} for UI App {}", noVNCUrl, uiAppEntity.getName());
-        return noVNCUrl;
-    }
-
-
-    public void killNoVncSession(String containerId) {
-        if (noVncProcesses.containsKey(containerId)) {
-            logger.info("Killing NoVnc process bind with container id " + containerId);
-            Process process = noVncProcesses.get(containerId);
-            process.destroy();
+        if (statusCode != 200) {
+            throw new Exception("Failed to kill novnc session for container " + containerId + " . Error code " + statusCode);
         }
     }
 
@@ -353,21 +371,25 @@ public class OrchestrationEngine {
         }
     }
 
-    public String checkUIContainerStatus(String containerId) {
-        DefaultDockerClientConfig.Builder config = DefaultDockerClientConfig.createDefaultConfigBuilder();
-        DockerClient dockerClient = DockerClientBuilder.getInstance(config.build()).build();
-        List<Container> containers = dockerClient.listContainersCmd().withIdFilter(Collections.singletonList(containerId)).exec();
-        if (containers.size() == 0) {
-            killNoVncSession(containerId);
-            return "STOPPED";
+    public String checkUIContainerStatus(String containerId) throws Exception {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet("http://localhost:8081/ui/container/status/" + containerId);
+
+        httpGet.setHeader("Accept", "application/json");
+
+        CloseableHttpResponse response = client.execute(httpGet);
+        int statusCode = response.getStatusLine().getStatusCode();
+
+        if (statusCode == 200) {
+            HttpEntity httpResponseEntity = response.getEntity();
+
+            String jsonOut = EntityUtils.toString(httpResponseEntity, StandardCharsets.UTF_8);
+
+            JSONObject jsonObject = new JSONObject(jsonOut);
+
+            return jsonObject.getString("status");
         } else {
-            ContainerPort[] ports = containers.get(0).getPorts();
-            ContainerPort vncBindPort = ports[0];
-            if (isPortOpen(vncBindPort.getPublicPort())) {
-                return "PORT_OPEN";
-            } else {
-                return "SETTING_UP";
-            }
+            throw new Exception("Failed to fetch container status from Agent. Error code " + statusCode);
         }
 
     }

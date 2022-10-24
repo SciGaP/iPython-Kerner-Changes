@@ -27,6 +27,7 @@
         <artifactId>jupyter-platform</artifactId>
         <groupId>org.apache.ariavata</groupId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

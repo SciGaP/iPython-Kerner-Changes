@@ -47,13 +47,13 @@ public class UIController {
     }
 
     @GetMapping(path = "/killNoVnc/{containerId}")
-    public String killNoVnc(Authentication authentication, @PathVariable String containerId) {
+    public String killNoVnc(Authentication authentication, @PathVariable String containerId) throws Exception {
         orchestrationEngine.killNoVncSession(containerId);
         return "Success";
     }
 
     @GetMapping(path = "/container/status/{containerId}")
-    public Map<String, String> getUiContainerStatus(Authentication authentication, @PathVariable String containerId) {
+    public Map<String, String> getUiContainerStatus(Authentication authentication, @PathVariable String containerId) throws Exception {
         String uiContainerStatus = orchestrationEngine.checkUIContainerStatus(containerId);
         return Collections.singletonMap("status", uiContainerStatus);
     }
