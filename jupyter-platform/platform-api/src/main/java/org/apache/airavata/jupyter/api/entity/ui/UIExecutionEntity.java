@@ -22,6 +22,8 @@ public class UIExecutionEntity {
     @Column(name = "ARCHIVE_ID")
     private String archiveId;
 
+    private String targetAgentId;
+
     public String getId() {
         return id;
     }
@@ -44,5 +46,13 @@ public class UIExecutionEntity {
 
     public void setAppName(String appName) {
         this.appName = appName;
+    }
+
+    public String getTargetAgentId() {
+        return targetAgentId;
+    }
+
+    public void setTargetAgentId(String targetAgentId) {
+        this.targetAgentId = targetAgentId;
     }
 }

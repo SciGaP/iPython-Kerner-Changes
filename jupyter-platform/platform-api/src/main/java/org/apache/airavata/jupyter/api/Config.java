@@ -82,6 +82,7 @@ public class Config implements WebMvcConfigurer {
                     .excludePathPatterns("/api/admin/**")
                     .excludePathPatterns("/api/job/**")
                     .excludePathPatterns("/api/ui/**")
+                    .excludePathPatterns("/api/agent/**")
                     .excludePathPatterns("/error");
         } else {
             registry.addInterceptor(authenticator)
@@ -89,6 +90,7 @@ public class Config implements WebMvcConfigurer {
                     .excludePathPatterns("/api/remote/run/**")
                     .excludePathPatterns("/api/ui/**")
                     .excludePathPatterns("/api/job/**")
+                    .excludePathPatterns("/api/agent/**")
                     .excludePathPatterns("/error");
         }
     }

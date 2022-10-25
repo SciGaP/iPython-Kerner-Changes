@@ -23,14 +23,15 @@ import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
+import org.apache.airavata.jupyter.api.controller.AgentController;
 import org.apache.airavata.jupyter.api.entity.ArchiveEntity;
 import org.apache.airavata.jupyter.api.entity.NotebookEntity;
 import org.apache.airavata.jupyter.api.entity.RunningNotebookEntity;
+import org.apache.airavata.jupyter.api.entity.agent.AgentInfoEntity;
 import org.apache.airavata.jupyter.api.entity.ui.UIAppEntity;
 import org.apache.airavata.jupyter.api.entity.ui.UIExecutionEntity;
 import org.apache.airavata.jupyter.api.entity.ui.UIExecutionResponseEntity;
 import org.apache.airavata.jupyter.api.repo.*;
-import org.apache.commons.io.Charsets;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -49,13 +50,10 @@ import org.springframework.data.util.Pair;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -100,6 +98,9 @@ public class OrchestrationEngine {
 
     @Autowired
     private UIExecutionRepository uiExecutionRepository;
+
+    @Autowired
+    private AgentController agentController;
 
     public void launchNotebook(NotebookEntity notebook, boolean force) throws Exception {
 
@@ -151,8 +152,11 @@ public class OrchestrationEngine {
 
         UIAppEntity uiAppEntity = appEtyOp.orElseThrow(() -> new Exception("No UI App " + savedExecutionEty.getAppName()));
 
+        AgentInfoEntity agentInfo = agentController.getAgentInfo(uiExecutionEntity.getTargetAgentId());
+
         CloseableHttpClient client = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost("http://localhost:8081/ui/launch");
+
+        HttpPost httpPost = new HttpPost(agentInfo.getAgentApiUrl() + "/ui/launch");
 
         String json = "{\n" +
                 "    \"executionId\": \"" + savedExecutionEty.getId()+ "\",\n" +
@@ -340,9 +344,11 @@ public class OrchestrationEngine {
         }
     }
 
-    public void killNoVncSession(String containerId) throws Exception {
+    public void killNoVncSession(String agentId, String containerId) throws Exception {
         CloseableHttpClient client = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet("http://localhost:8081/ui/killNoVnc/" + containerId);
+
+        AgentInfoEntity agentInfo = agentController.getAgentInfo(agentId);
+        HttpGet httpGet = new HttpGet(agentInfo.getAgentApiUrl() + "/ui/killNoVnc/" + containerId);
 
         httpGet.setHeader("Accept", "application/json");
 
@@ -371,9 +377,11 @@ public class OrchestrationEngine {
         }
     }
 
-    public String checkUIContainerStatus(String containerId) throws Exception {
+    public String checkUIContainerStatus(String agentId, String containerId) throws Exception {
         CloseableHttpClient client = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet("http://localhost:8081/ui/container/status/" + containerId);
+
+        AgentInfoEntity agentInfo = agentController.getAgentInfo(agentId);
+        HttpGet httpGet = new HttpGet(agentInfo.getAgentApiUrl() + "/ui/container/status/" + containerId);
 
         httpGet.setHeader("Accept", "application/json");
 

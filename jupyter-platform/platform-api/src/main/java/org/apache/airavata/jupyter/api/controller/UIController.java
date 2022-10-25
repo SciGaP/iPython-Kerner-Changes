@@ -46,15 +46,17 @@ public class UIController {
         return orchestrationEngine.launchUI(uiExecutionEntity);
     }
 
-    @GetMapping(path = "/killNoVnc/{containerId}")
-    public String killNoVnc(Authentication authentication, @PathVariable String containerId) throws Exception {
-        orchestrationEngine.killNoVncSession(containerId);
+    @GetMapping(path = "/killNoVnc/{agentId}/{containerId}")
+    public String killNoVnc(Authentication authentication, @PathVariable String agentId,
+                            @PathVariable String containerId) throws Exception {
+        orchestrationEngine.killNoVncSession(agentId, containerId);
         return "Success";
     }
 
-    @GetMapping(path = "/container/status/{containerId}")
-    public Map<String, String> getUiContainerStatus(Authentication authentication, @PathVariable String containerId) throws Exception {
-        String uiContainerStatus = orchestrationEngine.checkUIContainerStatus(containerId);
+    @GetMapping(path = "/container/status/{agentId}/{containerId}")
+    public Map<String, String> getUiContainerStatus(Authentication authentication,
+                                                    @PathVariable String agentId, @PathVariable String containerId) throws Exception {
+        String uiContainerStatus = orchestrationEngine.checkUIContainerStatus(agentId, containerId);
         return Collections.singletonMap("status", uiContainerStatus);
     }
 
