@@ -68,7 +68,11 @@ public class ArchiveController {
     public List<ArchiveEntity> listArchives() {
         Iterable<ArchiveEntity> all = archiveRepository.findAll();
         List<ArchiveEntity> archives = new ArrayList<>();
-        all.forEach(archives::add);
+        all.forEach(archive -> {
+            if (! (archive.getDescription().startsWith("HPC Export") || archive.getDescription().startsWith("Archive for UI Container"))) {
+                archives.add(archive);
+            }
+        });
         return archives;
     }
 
