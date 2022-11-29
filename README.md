@@ -22,7 +22,7 @@
 1. `pip install wheel`
 2. `pip install ipykernel/`
 3. `pip install tools/state_capture_magic`
-4. `jupyter kernelspec install  --user /home/dimuthu/code/iPython-Kerner-Changes/ipykernel/`
+4. `jupyter kernelspec install  --user ./ipykernel/`
 5. `pip install notebook`
 6. `jupyter notebook --ip 0.0.0.0 `
 
