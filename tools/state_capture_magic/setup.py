@@ -16,4 +16,8 @@ setup(
     author='Dimuthu Wannpurage',
     author_email='dwannipu@iu.edu',
     description='IPython Extension for Cassandra integration',
+    install_requires=[
+        'dill',
+        'requests',
+    ],
 )
